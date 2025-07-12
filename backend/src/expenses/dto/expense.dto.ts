@@ -10,10 +10,10 @@ export class ExpenseDto {
   id: string;
 
   @ApiProperty({
-    example: 42.50,
+    example: '42.50',
     description: 'Expense amount in the default currency',
   })
-  amount: number;
+  amount: string;
 
   @ApiProperty({
     example: '2024-03-15',

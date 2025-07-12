@@ -14,8 +14,10 @@ export class ExpensesService {
   async create(createExpenseDto: CreateExpenseDto): Promise<ExpenseDto> {
     const expense = await this.prisma.expense.create({
       data: {
-        ...createExpenseDto,
         amount: new Prisma.Decimal(createExpenseDto.amount),
+        date: new Date(createExpenseDto.date),
+        categoryId: createExpenseDto.categoryId,
+        note: createExpenseDto.note,
         userId: this.DEFAULT_USER_ID,
       },
       include: {
@@ -51,7 +53,7 @@ export class ExpensesService {
   private mapToExpenseDto(expense: any): ExpenseDto {
     return {
       id: expense.id,
-      amount: Number(expense.amount),
+      amount: expense.amount.toString(),
       date: expense.date.toISOString().split('T')[0],
       categoryId: expense.categoryId,
       note: expense.note,

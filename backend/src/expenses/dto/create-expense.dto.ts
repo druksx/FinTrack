@@ -1,25 +1,25 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDate, IsDecimal, IsOptional, IsString, IsUUID, Min } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { IsDateString, IsString, IsOptional, IsUUID, Matches } from 'class-validator';
 
 export class CreateExpenseDto {
   @ApiProperty({
-    example: 42.50,
+    example: '42.50',
     description: 'Expense amount in the default currency',
     minimum: 0.01,
   })
-  @IsDecimal()
-  @Min(0.01)
-  amount: number;
+  @IsString()
+  @Matches(/^\d+(\.\d{1,2})?$/, {
+    message: 'Amount must be a valid decimal number with up to 2 decimal places',
+  })
+  amount: string;
 
   @ApiProperty({
     example: '2024-03-15',
     description: 'Date of the expense',
     format: 'date',
   })
-  @Transform(({ value }) => new Date(value))
-  @IsDate()
-  date: Date;
+  @IsDateString()
+  date: string;
 
   @ApiProperty({
     example: '123e4567-e89b-12d3-a456-426614174000',
