@@ -1,0 +1,27 @@
+{
+  "name": "fintrack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "contract:lint": "redocly lint contracts/openapi.yaml",
+    "docs:serve": "redocly preview-docs contracts/openapi.yaml",
+    "docs:build": "redocly build-docs contracts/openapi.yaml -o docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/druksx/FinTrack.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/druksx/FinTrack/issues"
+  },
+  "homepage": "https://github.com/druksx/FinTrack#readme",
+  "devDependencies": {
+    "@redocly/cli": "^1.10.1"
+  }
+}
