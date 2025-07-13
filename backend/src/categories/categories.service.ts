@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { CategoryDto } from './dto/category.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class CategoriesService {
@@ -17,5 +18,53 @@ export class CategoriesService {
     return this.prisma.category.findMany({
       orderBy: { name: 'asc' },
     });
+  }
+
+  async deleteOne(id: string): Promise<void> {
+    try {
+      // First check if the category exists and has any expenses
+      const category = await this.prisma.category.findUnique({
+        where: { id },
+        include: { expenses: { take: 1 } }, // Only need to check if any exist
+      });
+
+      if (!category) {
+        throw new NotFoundException(`Category with ID ${id} not found`);
+      }
+
+      if (category.expenses.length > 0) {
+        throw new ConflictException(
+          'Cannot delete category because it has linked expenses. Please delete the expenses first.'
+        );
+      }
+
+      // If we get here, we can safely delete the category
+      await this.prisma.category.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundException(`Category with ID ${id} not found`);
+        }
+      }
+      throw error;
+    }
+  }
+
+  async update(id: string, updateCategoryDto: CreateCategoryDto): Promise<CategoryDto> {
+    try {
+      return await this.prisma.category.update({
+        where: { id },
+        data: updateCategoryDto,
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundException(`Category with ID ${id} not found`);
+        }
+      }
+      throw error;
+    }
   }
 }

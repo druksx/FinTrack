@@ -50,6 +50,7 @@ describe('ExpensesController (e2e)', () => {
       data: {
         name: 'Test Category',
         color: '#FF0000',
+        icon: 'Star',
       },
     });
     categoryId = category.id;
@@ -88,6 +89,7 @@ describe('ExpensesController (e2e)', () => {
           id: categoryId,
           name: 'Test Category',
           color: '#FF0000',
+          icon: 'Star',
         }),
       });
       expect(response.body).toHaveProperty('id');
@@ -159,6 +161,7 @@ describe('ExpensesController (e2e)', () => {
             expect(expense).toHaveProperty('date');
             expect(expense).toHaveProperty('category');
             expect(expense.category).toHaveProperty('id', categoryId);
+            expect(expense.category).toHaveProperty('icon', 'Star');
           });
         });
     });

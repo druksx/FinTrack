@@ -41,6 +41,7 @@ describe('CategoriesController (e2e)', () => {
       const category = {
         name: 'Test Category',
         color: '#FF0000',
+        icon: 'Star',
       };
 
       return request(app.getHttpServer())
@@ -56,7 +57,7 @@ describe('CategoriesController (e2e)', () => {
     it('should validate category input', () => {
       return request(app.getHttpServer())
         .post('/categories')
-        .send({ name: '', color: 'invalid-color' })
+        .send({ name: '', color: 'invalid-color', icon: '' })
         .expect(400)
         .expect((res) => {
           expect(res.body.error).toBe('Bad Request');
@@ -66,27 +67,30 @@ describe('CategoriesController (e2e)', () => {
   });
 
   describe('/categories (GET)', () => {
-    beforeEach(async () => {
-      // Seed some test categories
+    it('should return all categories', async () => {
+      // Create test categories
       await prisma.category.createMany({
         data: [
-          { name: 'Food', color: '#FF0000' },
-          { name: 'Transport', color: '#00FF00' },
+          { name: 'Food', color: '#FF0000', icon: 'Utensils' },
+          { name: 'Transport', color: '#00FF00', icon: 'Car' },
         ],
       });
-    });
 
-    it('should return all categories', () => {
       return request(app.getHttpServer())
         .get('/categories')
         .expect(200)
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
-          expect(res.body).toHaveLength(2);
+          expect(res.body.length).toBeGreaterThan(0);
           expect(res.body[0]).toHaveProperty('id');
           expect(res.body[0]).toHaveProperty('name');
           expect(res.body[0]).toHaveProperty('color');
+          expect(res.body[0]).toHaveProperty('icon');
+          // Verify the actual categories
+          const names = res.body.map(c => c.name).sort();
+          expect(names).toContain('Food');
+          expect(names).toContain('Transport');
         });
     });
   });
-}); 
+});

@@ -21,4 +21,13 @@ export class CreateCategoryDto {
   @IsString()
   @IsHexColor()
   color: string;
+
+  @ApiProperty({
+    example: 'ShoppingCart',
+    description: 'Lucide icon name for the category',
+  })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(50)
+  icon: string;
 }

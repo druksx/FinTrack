@@ -1,0 +1,145 @@
+import {
+  Utensils,
+  Car,
+  Home,
+  Lightbulb,
+  ShoppingBag,
+  Popcorn,
+  Heart,
+  GraduationCap,
+  Plane,
+  CircleDot,
+  Wallet,
+  Coffee,
+  Gift,
+  Shirt,
+  DollarSign,
+  Smartphone,
+  Bus,
+  Dumbbell,
+  BadgeQuestionMark,
+  type LucideIcon,
+  // Adding more useful icons
+  ShoppingCart,
+  CreditCard,
+  Receipt,
+  Tv,
+  Wifi,
+  Wine,
+  Music,
+  Book,
+  Gamepad2,
+  Baby,
+  Dog,
+  Pill,
+  Stethoscope,
+  Train,
+  Bike,
+  Building,
+  Wrench,
+  Scissors,
+  Laptop,
+  Phone,
+  Pizza,
+  Beer,
+  Briefcase,
+  Newspaper,
+  Plug,
+  Droplets,
+  Flower2,
+  Paintbrush,
+  Palette,
+  Camera,
+  Film,
+  Ticket,
+  Drumstick,
+  Sandwich,
+  Beef,
+  Carrot,
+  Apple,
+  IceCream,
+  Cookie,
+} from "lucide-react";
+
+// Map of all available icons for the components to use
+export const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  // Shopping & Retail
+  ShoppingBag,
+  ShoppingCart,
+  Shirt,
+  Gift,
+
+  // Food & Dining
+  Utensils,
+  Coffee,
+  Pizza,
+  Beer,
+  Wine,
+  Drumstick,
+  Sandwich,
+  Beef,
+  Carrot,
+  Apple,
+  IceCream,
+  Cookie,
+
+  // Transportation
+  Car,
+  Bus,
+  Train,
+  Plane,
+  Bike,
+
+  // Home & Utilities
+  Home,
+  Building,
+  Lightbulb,
+  Wifi,
+  Plug,
+  Droplets,
+  Wrench,
+
+  // Entertainment & Leisure
+  Popcorn,
+  Tv,
+  Music,
+  Book,
+  Gamepad2,
+  Film,
+  Ticket,
+  Camera,
+
+  // Health & Wellness
+  Heart,
+  Dumbbell,
+  Pill,
+  Stethoscope,
+
+  // Education & Work
+  GraduationCap,
+  Briefcase,
+  Laptop,
+  Phone,
+  Smartphone,
+
+  // Pets & Family
+  Baby,
+  Dog,
+
+  // Hobbies & Activities
+  Paintbrush,
+  Palette,
+  Scissors,
+  Flower2,
+
+  // Financial
+  Wallet,
+  DollarSign,
+  CreditCard,
+  Receipt,
+
+  // Miscellaneous
+  CircleDot,
+  BadgeQuestionMark,
+  Newspaper,
+};

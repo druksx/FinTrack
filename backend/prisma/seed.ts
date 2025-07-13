@@ -3,34 +3,31 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const defaultCategories = [
-  { name: 'Food & Dining', color: '#65CE55' }, // Our secondary color
-  { name: 'Transportation', color: '#4CAF50' },
-  { name: 'Housing', color: '#2E7D32' },
-  { name: 'Utilities', color: '#1B5E20' }, // Darker variants
-  { name: 'Shopping', color: '#388E3C' },
-  { name: 'Entertainment', color: '#43A047' },
-  { name: 'Healthcare', color: '#66BB6A' },
-  { name: 'Education', color: '#81C784' }, // Lighter variants
-  { name: 'Travel', color: '#A5D6A7' },
-  { name: 'Other', color: '#C8E6C9' },
+  { name: 'Food & Dining', color: '#FF9F1C', icon: 'Utensils' }, // Warm orange for food
+  { name: 'Transportation', color: '#4361EE', icon: 'Car' }, // Blue for movement/travel
+  { name: 'Housing', color: '#2A9D8F', icon: 'Home' }, // Teal for home/shelter
+  { name: 'Utilities', color: '#F72585', icon: 'Lightbulb' }, // Pink for energy/power
+  { name: 'Shopping', color: '#7209B7', icon: 'ShoppingBag' }, // Purple for retail/shopping
+  { name: 'Entertainment', color: '#FFD93D', icon: 'Popcorn' }, // Yellow for fun/leisure
+  { name: 'Healthcare', color: '#06D6A0', icon: 'Heart' }, // Green for health/wellness
+  { name: 'Education', color: '#4895EF', icon: 'GraduationCap' }, // Light blue for learning
+  { name: 'Travel', color: '#F15BB5', icon: 'Plane' }, // Pink for adventure
+  { name: 'Other', color: '#94A3B8', icon: 'CircleDot' }, // Neutral slate for misc
 ];
 
 async function main() {
   console.log('Start seeding default categories...');
 
-  for (const category of defaultCategories) {
-    const existing = await prisma.category.findFirst({
-      where: { name: category.name },
-    });
+  // First, delete all existing categories
+  await prisma.category.deleteMany();
+  console.log('Cleared existing categories');
 
-    if (!existing) {
-      await prisma.category.create({
-        data: category,
-      });
-      console.log(`Created category: ${category.name}`);
-    } else {
-      console.log(`Category already exists: ${category.name}`);
-    }
+  // Then create new ones
+  for (const category of defaultCategories) {
+    await prisma.category.create({
+      data: category,
+    });
+    console.log(`Created category: ${category.name}`);
   }
 
   console.log('Seeding finished.');
