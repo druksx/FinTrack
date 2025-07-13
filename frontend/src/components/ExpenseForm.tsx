@@ -95,7 +95,7 @@ export default function ExpenseForm({
 
   const handleDeleteCategory = async (id: string, name: string) => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.CATEGORIES}/${id}`, {
+      const response = await fetch(`/api/categories/${id}`, {
         method: "DELETE",
       });
 

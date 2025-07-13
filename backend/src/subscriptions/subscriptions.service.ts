@@ -183,7 +183,12 @@ export class SubscriptionsService {
     const subscription = await this.prisma.subscription.update({
       where: { id },
       data: {
-        ...updateData,
+        name: updateData.name,
+        amount: updateData.amount !== undefined ? new Prisma.Decimal(updateData.amount) : undefined,
+        logoUrl: updateData.logoUrl,
+        recurrence: updateData.recurrence,
+        startDate: updateData.startDate ? startDate : undefined,
+        categoryId: updateData.categoryId,
         nextPayment: this.calculateNextPayment(
           startDate,
           (updateData.recurrence || existingSubscription.recurrence) as

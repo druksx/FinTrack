@@ -34,16 +34,26 @@ export default function AddSubscriptionDialog({
   const handleSubmit = async (data: any) => {
     try {
       setIsSubmitting(true);
+      
+      // Format the data for the API
+      const formattedData = {
+        ...data,
+        // Convert amount to number and handle potential decimal places
+        amount: Number(parseFloat(data.amount).toFixed(2)),
+        // Ensure date is in the correct format
+        startDate: new Date(data.startDate).toISOString().split('T')[0],
+      };
+
       const response = await fetch(
         editSubscription
-          ? `${API_ENDPOINTS.SUBSCRIPTIONS}/${editSubscription.id}`
-          : API_ENDPOINTS.SUBSCRIPTIONS,
+          ? `/api/subscriptions/${editSubscription.id}`
+          : "/api/subscriptions",
         {
           method: editSubscription ? "PUT" : "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify(formattedData),
         }
       );
 

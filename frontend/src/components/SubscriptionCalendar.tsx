@@ -61,7 +61,7 @@ export default function SubscriptionCalendar() {
       setIsLoading(true);
       const [year, month] = monthString.split("-");
       const response = await fetch(
-        `${API_ENDPOINTS.SUBSCRIPTIONS}/month?year=${year}&month=${month}`
+        `/api/subscriptions/month?year=${year}&month=${month}`
       );
 
       if (!response.ok) {
@@ -85,7 +85,7 @@ export default function SubscriptionCalendar() {
 
   const handleDeleteSubscription = async (id: string) => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.SUBSCRIPTIONS}/${id}`, {
+      const response = await fetch(`/api/subscriptions/${id}`, {
         method: "DELETE",
       });
 

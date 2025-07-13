@@ -77,8 +77,8 @@ export default function CategoryDialog({
     setIsSubmitting(true);
     try {
       const url = editCategory 
-        ? `${API_ENDPOINTS.CATEGORIES}/${editCategory.id}`
-        : API_ENDPOINTS.CATEGORIES;
+        ? `/api/categories/${editCategory.id}`
+        : "/api/categories";
       
       const method = editCategory ? "PUT" : "POST";
 

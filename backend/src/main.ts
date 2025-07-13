@@ -15,7 +15,8 @@ async function bootstrap() {
 
   // Enable CORS for frontend
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'http://frontend:3000'],
+    credentials: true,
   });
 
   // Apply global exception filter

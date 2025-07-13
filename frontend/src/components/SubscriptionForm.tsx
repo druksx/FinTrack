@@ -62,11 +62,18 @@ export default function SubscriptionForm({
       startDate: new Date().toISOString().split("T")[0],
       categoryId: "",
     },
+    values: defaultValues ? {
+      ...defaultValues,
+      // Ensure amount is a string for the form input
+      amount: defaultValues.amount.toString(),
+      // Ensure date is in YYYY-MM-DD format
+      startDate: new Date(defaultValues.startDate).toISOString().split("T")[0],
+    } : undefined,
   });
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.CATEGORIES);
+      const response = await fetch("/api/categories");
       if (!response.ok) {
         throw new Error("Failed to fetch categories");
       }

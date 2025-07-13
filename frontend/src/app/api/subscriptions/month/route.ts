@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 
+const API_URL = process.env.API_URL || 'http://localhost:3333';
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const year = searchParams.get("year");
@@ -7,7 +9,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/subscriptions/month?year=${year}&month=${month}`,
+      `${API_URL}/subscriptions/month?year=${year}&month=${month}`,
       {
         headers: {
           "Content-Type": "application/json",

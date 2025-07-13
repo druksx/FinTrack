@@ -1,8 +1,10 @@
 import { NextRequest } from "next/server";
 
+const API_URL = process.env.API_URL || 'http://localhost:3333';
+
 export async function GET(request: NextRequest) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscriptions`, {
+    const response = await fetch(`${API_URL}/subscriptions`, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -27,7 +29,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/subscriptions`,
+      `${API_URL}/subscriptions`,
       {
         method: "POST",
         headers: {
