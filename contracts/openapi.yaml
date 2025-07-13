@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: FinTrack API
   version: 1.0.0
-  description: Personal expense tracker API
+  description: Personal expense tracker API with support for recurring subscriptions and expense analytics
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
@@ -18,6 +18,7 @@ paths:
   /expenses:
     post:
       summary: Create a new expense
+      description: Create a new one-time expense entry with category assignment
       operationId: createExpense
       tags: [Expenses]
       requestBody:
@@ -39,6 +40,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
     get:
       summary: List expenses for a specific month
+      description: Retrieve all expenses for a given month, including their associated categories
       operationId: listExpenses
       tags: [Expenses]
       parameters:
@@ -64,9 +66,108 @@ paths:
         401:
           $ref: '#/components/responses/Unauthorized'
 
+  /expenses/{id}:
+    get:
+      summary: Get expense by ID
+      description: Retrieve detailed information about a specific expense
+      operationId: getExpense
+      tags: [Expenses]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Expense details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseDto'
+        404:
+          $ref: '#/components/responses/NotFound'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      summary: Delete expense
+      description: Permanently remove an expense entry
+      operationId: deleteExpense
+      tags: [Expenses]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Expense deleted successfully
+        404:
+          $ref: '#/components/responses/NotFound'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /expenses/dashboard:
+    get:
+      summary: Get expense dashboard data
+      description: Retrieve analytics and summary data for expenses in a given month
+      operationId: getDashboard
+      tags: [Expenses]
+      parameters:
+        - name: month
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^\d{4}-\d{2}$'
+            example: '2024-03'
+          description: Month in YYYY-MM format
+      responses:
+        200:
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardDto'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /expenses/export:
+    get:
+      summary: Export expenses
+      description: Export expenses for a given month in CSV format
+      operationId: exportExpenses
+      tags: [Expenses]
+      parameters:
+        - name: month
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^\d{4}-\d{2}$'
+            example: '2024-03'
+          description: Month in YYYY-MM format
+      responses:
+        200:
+          description: CSV file containing expenses
+          content:
+            text/csv:
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
   /categories:
     get:
       summary: List all expense categories
+      description: Retrieve all available expense categories for organization
       operationId: listCategories
       tags: [Categories]
       responses:
@@ -82,6 +183,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
     post:
       summary: Create a new category
+      description: Create a new expense category with a custom name and color
       operationId: createCategory
       tags: [Categories]
       requestBody:
@@ -97,6 +199,119 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CategoryDto'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /subscriptions:
+    get:
+      summary: List all subscriptions
+      description: Retrieve all active recurring subscriptions
+      operationId: listSubscriptions
+      tags: [Subscriptions]
+      responses:
+        200:
+          description: List of subscriptions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubscriptionDto'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      summary: Create a new subscription
+      description: Create a new recurring subscription with monthly billing
+      operationId: createSubscription
+      tags: [Subscriptions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubscriptionDto'
+      responses:
+        201:
+          description: Subscription created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionDto'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /subscriptions/{id}:
+    get:
+      summary: Get subscription by ID
+      description: Retrieve detailed information about a specific subscription
+      operationId: getSubscription
+      tags: [Subscriptions]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Subscription details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionDto'
+        404:
+          $ref: '#/components/responses/NotFound'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      summary: Delete subscription
+      description: Cancel and remove a recurring subscription
+      operationId: deleteSubscription
+      tags: [Subscriptions]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Subscription deleted successfully
+        404:
+          $ref: '#/components/responses/NotFound'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /subscriptions/month:
+    get:
+      summary: Get subscriptions for month
+      description: Retrieve all subscriptions that will be billed in a specific month
+      operationId: getSubscriptionsForMonth
+      tags: [Subscriptions]
+      parameters:
+        - name: month
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^\d{4}-\d{2}$'
+            example: '2024-03'
+          description: Month in YYYY-MM format
+      responses:
+        200:
+          description: List of subscriptions for the month
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubscriptionDto'
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -127,14 +342,17 @@ components:
           type: string
           format: date
           example: '2024-03-15'
+          description: Date when the expense occurred
         categoryId:
           type: string
           format: uuid
           example: '123e4567-e89b-12d3-a456-426614174000'
+          description: ID of the category this expense belongs to
         note:
           type: string
           maxLength: 500
           example: 'Weekly groceries'
+          description: Optional note to provide more context about the expense
 
     ExpenseDto:
       type: object
@@ -148,22 +366,29 @@ components:
         id:
           type: string
           format: uuid
+          description: Unique identifier for the expense
         amount:
           type: number
           format: decimal
+          description: Expense amount in the default currency
         date:
           type: string
           format: date
+          description: Date when the expense occurred
         categoryId:
           type: string
           format: uuid
+          description: ID of the category this expense belongs to
         note:
           type: string
+          description: Optional note providing more context
         category:
           $ref: '#/components/schemas/CategoryDto'
+          description: Full category details
         createdAt:
           type: string
           format: date-time
+          description: Timestamp when the expense was created
 
     CreateCategoryDto:
       type: object
@@ -176,11 +401,12 @@ components:
           minLength: 1
           maxLength: 50
           example: 'Groceries'
+          description: Display name for the category
         color:
           type: string
           pattern: '^#[0-9A-Fa-f]{6}$'
           example: '#65CE55'
-          description: Hex color code
+          description: Hex color code for visual representation
 
     CategoryDto:
       type: object
@@ -192,11 +418,136 @@ components:
         id:
           type: string
           format: uuid
+          description: Unique identifier for the category
         name:
           type: string
+          description: Display name of the category
         color:
           type: string
           pattern: '^#[0-9A-Fa-f]{6}$'
+          description: Hex color code for visual representation
+
+    CreateSubscriptionDto:
+      type: object
+      required:
+        - name
+        - amount
+        - categoryId
+        - billingDay
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: 'Netflix'
+          description: Name of the subscription service
+        amount:
+          type: number
+          format: decimal
+          minimum: 0.01
+          example: 15.99
+          description: Monthly billing amount
+        categoryId:
+          type: string
+          format: uuid
+          description: Category to assign expenses to when generated
+        billingDay:
+          type: integer
+          minimum: 1
+          maximum: 31
+          example: 15
+          description: Day of the month when billing occurs
+        note:
+          type: string
+          maxLength: 500
+          description: Optional note about the subscription
+
+    SubscriptionDto:
+      type: object
+      required:
+        - id
+        - name
+        - amount
+        - categoryId
+        - billingDay
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the subscription
+        name:
+          type: string
+          description: Name of the subscription service
+        amount:
+          type: number
+          format: decimal
+          description: Monthly billing amount
+        categoryId:
+          type: string
+          format: uuid
+          description: Category assigned to generated expenses
+        billingDay:
+          type: integer
+          description: Day of the month when billing occurs
+        note:
+          type: string
+          description: Optional note about the subscription
+        category:
+          $ref: '#/components/schemas/CategoryDto'
+          description: Full category details
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the subscription was created
+
+    DashboardDto:
+      type: object
+      required:
+        - totalAmount
+        - categoryBreakdown
+        - dailyExpenses
+      properties:
+        totalAmount:
+          type: number
+          format: decimal
+          description: Total expenses for the month
+        categoryBreakdown:
+          type: array
+          description: Breakdown of expenses by category
+          items:
+            type: object
+            required:
+              - categoryId
+              - amount
+              - percentage
+            properties:
+              categoryId:
+                type: string
+                format: uuid
+              category:
+                $ref: '#/components/schemas/CategoryDto'
+              amount:
+                type: number
+                format: decimal
+              percentage:
+                type: number
+                format: float
+        dailyExpenses:
+          type: array
+          description: Daily expense totals for the month
+          items:
+            type: object
+            required:
+              - date
+              - amount
+            properties:
+              date:
+                type: string
+                format: date
+              amount:
+                type: number
+                format: decimal
 
   responses:
     BadRequest:
@@ -232,3 +583,19 @@ components:
               statusCode:
                 type: integer
                 example: 401
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - message
+              - statusCode
+            properties:
+              message:
+                type: string
+                example: Resource not found
+              statusCode:
+                type: integer
+                example: 404

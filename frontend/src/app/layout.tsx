@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import Navbar from "@/components/Navbar";
 import { MonthProvider } from "@/lib/MonthContext";
 import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,19 +28,21 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <MonthProvider>
-        <div className="min-h-screen bg-primary/5 px-4 py-4">
-          <div className="container mx-auto max-w-7xl space-y-6">
-            <div className="rounded-2xl border bg-secondary/10 p-4 shadow-sm">
-              <Navbar />
-            </div>
-            <div className="rounded-2xl border bg-background p-8 shadow-sm">
-              {children}
-            </div>
-          </div>
-        </div>
-            <Toaster />
-          </MonthProvider>
+          <TooltipProvider delayDuration={0}>
+            <MonthProvider>
+              <div className="min-h-screen bg-primary/5 px-4 pt-2">
+                <div className="container mx-auto max-w-7xl space-y-4">
+                  <div className="rounded-2xl border bg-secondary/10 p-4 shadow-sm">
+                    <Navbar />
+                  </div>
+                  <div className="rounded-2xl border bg-background p-4 shadow-sm">
+                    {children}
+                  </div>
+                </div>
+              </div>
+              <Toaster />
+            </MonthProvider>
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

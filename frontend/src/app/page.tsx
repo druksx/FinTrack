@@ -1,35 +1,51 @@
+"use client";
+
 import Image from "next/image";
 import DarkSwitch from "@/components/DarkSwitch";
-import ExpenseList from "@/components/ExpenseList"
+import ExpenseList from "@/components/ExpenseList";
+import DashboardCards from "@/components/DashboardCards";
+import ExportExpenses from "@/components/ExportExpenses";
+import SubscriptionCalendar from "@/components/SubscriptionCalendar";
+import AddSubscriptionDialog from "@/components/AddSubscriptionDialog";
 
 export default function Home() {
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="col-span-2 rounded-xl border bg-secondary/10 p-6 shadow-sm">
-          <h2 className="text-2xl font-semibold mb-4 text-primary">Recent Expenses</h2>
-          <ExpenseList />
+    <div className="space-y-4">
+      <div className="min-h-[calc(100vh-8rem)] grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Left Column - Recent Expenses */}
+        <div className="lg:col-span-4">
+          <div className="rounded-xl border bg-secondary/10 shadow-sm flex flex-col max-h-[calc(100vh-9rem)]">
+            <div className="p-4 pb-3 border-b bg-secondary/10">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-semibold text-primary">
+                  Recent Expenses
+                </h2>
+                <ExportExpenses />
+              </div>
+            </div>
+            <div className="p-4 flex-1 overflow-y-auto">
+              <ExpenseList />
+            </div>
+          </div>
         </div>
-        <div className="rounded-xl border bg-primary/5 p-6 shadow-sm">
-          <h2 className="text-2xl font-semibold mb-4 text-secondary">Monthly Summary</h2>
-          <p className="text-primary/60">Your monthly stats will appear here</p>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="rounded-xl border bg-secondary/10 p-6 shadow-sm">
-          <h2 className="text-xl font-semibold mb-4 text-primary">Top Categories</h2>
-          <p className="text-primary/60">Category breakdown will appear here</p>
-        </div>
-        <div className="rounded-xl border bg-primary/5 p-6 shadow-sm">
-          <h2 className="text-xl font-semibold mb-4 text-secondary">Spending Trends</h2>
-          <p className="text-primary/60">Trend chart will appear here</p>
-        </div>
-        <div className="rounded-xl border bg-secondary/10 p-6 shadow-sm">
-          <h2 className="text-xl font-semibold mb-4 text-primary">Budget Status</h2>
-          <p className="text-primary/60">Budget progress will appear here</p>
+
+        {/* Right Column - Dashboard Cards and Calendar */}
+        <div className="lg:col-span-8 space-y-4">
+          {/* Dashboard Cards */}
+          <div className="rounded-xl border bg-card shadow-sm p-4">
+            <DashboardCards />
+          </div>
+
+          {/* Subscriptions Section */}
+          <div className="rounded-xl border bg-card shadow-sm p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-semibold">Subscriptions</h2>
+              <AddSubscriptionDialog />
+            </div>
+            <SubscriptionCalendar />
+          </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

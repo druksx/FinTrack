@@ -25,6 +25,7 @@ import * as z from "zod";
 import CategoryDialog from "./AddCategoryDialog";
 import { CATEGORY_ICONS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
+import { API_ENDPOINTS } from "@/lib/api";
 
 interface Category {
   id: string;
@@ -94,7 +95,7 @@ export default function ExpenseForm({
 
   const handleDeleteCategory = async (id: string, name: string) => {
     try {
-      const response = await fetch(`/api/categories/${id}`, {
+      const response = await fetch(`${API_ENDPOINTS.CATEGORIES}/${id}`, {
         method: "DELETE",
       });
 
@@ -283,7 +284,8 @@ export default function ExpenseForm({
                                     type="button"
                                     variant="ghost"
                                     size="sm"
-                                    className="px-2 text-muted-foreground hover:text-red-500 hover:bg-red-50"
+                                    className="px-2 text-muted-foreground"
+                                    data-delete="true"
                                     onClick={(e) => {
                                       e.preventDefault();
                                       e.stopPropagation();

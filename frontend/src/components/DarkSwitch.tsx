@@ -9,12 +9,12 @@ export default function DarkSwitch() {
   return (
     <button
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="rounded-md p-2 hover:bg-accent dark:hover:bg-accent"
+      className="rounded-md p-2 hover:bg-black hover:text-white transition-colors"
     >
       {theme === "dark" ? (
         <SunIcon className="h-5 w-5 text-background" />
       ) : (
-        <MoonIcon className="h-5 w-5 text-primary" />
+        <MoonIcon className="h-5 w-5" />
       )}
       <span className="sr-only">Toggle theme</span>
     </button>

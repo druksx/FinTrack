@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, Put, Delete, Query, Param } from '@nestjs/
 import { ExpensesService } from './expenses.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { ExpenseDto } from './dto/expense.dto';
+import { DashboardDataDto } from './dto/dashboard.dto';
 import { ApiOperation, ApiResponse, ApiTags, ApiNotFoundResponse } from '@nestjs/swagger';
 import { IsOptional, Matches } from 'class-validator';
 
@@ -46,5 +47,17 @@ export class ExpensesController {
   @ApiNotFoundResponse({ description: 'Expense not found' })
   delete(@Param('id') id: string): Promise<void> {
     return this.expensesService.delete(id);
+  }
+
+  @Get('dashboard')
+  @ApiOperation({ summary: 'Get dashboard data with expense summaries and trends' })
+  @ApiResponse({ status: 200, type: DashboardDataDto })
+  getDashboardData(@Query() query: GetExpensesQuery): Promise<DashboardDataDto> {
+    return this.expensesService.getDashboardData(query.month);
+  }
+
+  @Get('export')
+  async getExpensesForExport(@Query('month') month: string) {
+    return this.expensesService.getExpensesForExport(month);
   }
 }

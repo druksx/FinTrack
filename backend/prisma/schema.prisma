@@ -23,13 +23,14 @@ model User {
 }
 
 model Category {
-  id        String    @id @default(uuid())
+  id        String   @id @default(cuid())
   name      String
-  color     String    // Hex color code
-  icon      String    // Lucide icon name
+  color     String
+  icon      String
   expenses  Expense[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  subscriptions Subscription[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("categories")
 }
@@ -50,4 +51,21 @@ model Expense {
   @@index([categoryId])
   @@index([date])
   @@map("expenses")
+}
+
+model Subscription {
+  id          String   @id @default(cuid())
+  name        String
+  amount      Decimal  @db.Decimal(10, 2)
+  logoUrl     String?  // URL of the service logo
+  recurrence  String   // "MONTHLY" or "ANNUALLY"
+  startDate   DateTime // When the subscription started
+  nextPayment DateTime // Next payment due date
+  category    Category @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("subscriptions")
+  @@index([categoryId])
 }

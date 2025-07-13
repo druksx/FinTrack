@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { BadgeQuestionMark } from "lucide-react";
 import { CATEGORY_ICONS } from "@/lib/constants";
+import { API_ENDPOINTS } from "@/lib/api";
 import React from "react";
 
 interface CategoryDialogProps {
@@ -76,8 +77,8 @@ export default function CategoryDialog({
     setIsSubmitting(true);
     try {
       const url = editCategory 
-        ? `/api/categories/${editCategory.id}`
-        : "/api/categories";
+        ? `${API_ENDPOINTS.CATEGORIES}/${editCategory.id}`
+        : API_ENDPOINTS.CATEGORIES;
       
       const method = editCategory ? "PUT" : "POST";
 

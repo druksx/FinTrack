@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsString, IsOptional, IsUUID, Matches } from 'class-validator';
+import { IsDateString, IsString, IsOptional, Matches } from 'class-validator';
 
 export class CreateExpenseDto {
   @ApiProperty({
@@ -22,11 +22,14 @@ export class CreateExpenseDto {
   date: string;
 
   @ApiProperty({
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    example: 'cmd1sifx80000g089rt641l1s',
     description: 'The ID of the category this expense belongs to',
-    format: 'uuid',
+    format: 'cuid',
   })
-  @IsUUID()
+  @IsString()
+  @Matches(/^c[a-z0-9]+$/, {
+    message: 'Category ID must be a valid CUID',
+  })
   categoryId: string;
 
   @ApiPropertyOptional({

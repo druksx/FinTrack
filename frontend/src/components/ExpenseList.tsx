@@ -6,7 +6,6 @@ import CategoryPill from "./CategoryPill";
 import AddExpenseDialog from "./AddExpenseDialog";
 import { useMonth } from "@/lib/MonthContext";
 import { CATEGORY_ICONS } from "@/lib/constants";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 interface Category {
@@ -115,87 +114,70 @@ export default function ExpenseList() {
 
   return (
     <div className="space-y-4">
-      <AddExpenseDialog
-        onExpenseAdded={fetchExpenses}
-        isOpen={isAddExpenseOpen}
-        onOpenChange={setIsAddExpenseOpen}
-        editExpense={editingExpense}
-      />
-
-      {expenses.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 text-muted">
-          <BadgeQuestionMark className="h-8 w-8 mb-2" />
-          <p>No expenses found for this month</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
+      <div className="flex flex-col gap-3">
           {expenses.map((expense) => {
-            const Icon =
-              CATEGORY_ICONS[expense.category.icon] || BadgeQuestionMark;
-
+          const IconComponent = CATEGORY_ICONS[expense.category.icon] || BadgeQuestionMark;
             return (
               <div
                 key={expense.id}
-                className="flex items-center gap-4 rounded-xl border border-secondary p-4 hover:bg-secondary/5 transition-colors group"
+              className="flex items-center gap-3 rounded-lg border bg-card p-3 pr-4"
               >
-                <div className="flex min-w-[60px] items-center justify-center text-sm text-muted tabular-nums">
-                  {new Date(expense.date).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  })}
+              <div
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md"
+                style={{ backgroundColor: expense.category.color }}
+              >
+                <IconComponent className="h-5 w-5 text-white" />
                 </div>
-
-                <div
-                  className="flex h-8 w-8 items-center justify-center rounded-lg"
-                  style={{
-                    backgroundColor: `${expense.category.color}15`,
-                    color: expense.category.color,
-                  }}
-                >
-                  <Icon className="h-4 w-4" />
-                </div>
-
-                <div className="flex-1">
-                  <div className="font-medium text-primary">{expense.note}</div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="truncate">
+                    <p className="font-medium truncate">{expense.note}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(expense.date).toLocaleDateString()}
+                    </p>
+                    <div className="mt-1">
                   <CategoryPill
                     name={expense.category.name}
                     color={expense.category.color}
                     icon={expense.category.icon}
-                    className="mt-1"
                   />
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <div className="min-w-[100px] text-right font-medium text-primary tabular-nums">
-                    ${Number(expense.amount).toFixed(2)}
                   </div>
-
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="px-2 text-muted-foreground hover:text-blue-500 hover:bg-blue-50"
-                      onClick={() => handleEditExpense(expense)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="px-2 text-muted-foreground hover:text-red-500 hover:bg-red-50"
-                      onClick={() => handleDeleteExpense(expense.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  <div className="flex items-center gap-3">
+                    <p className="font-medium whitespace-nowrap">
+                      ${Number(expense.amount).toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleEditExpense(expense)}
+                        className="rounded-md p-1 hover:bg-black hover:text-white transition-colors"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteExpense(expense.id)}
+                        className="rounded-md p-1 hover:bg-red-600 hover:text-white transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
                   </div>
                 </div>
               </div>
             );
           })}
         </div>
-      )}
+
+      <AddExpenseDialog
+        onExpenseAdded={fetchExpenses}
+        isOpen={isAddExpenseOpen}
+        onOpenChange={setIsAddExpenseOpen}
+        editExpense={editingExpense}
+      />
     </div>
   );
 }

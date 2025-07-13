@@ -19,7 +19,7 @@ export default function MonthSelector() {
     <div className="flex items-center gap-2">
       <button
         onClick={handlePrevMonth}
-        className="rounded-md p-1 hover:bg-primary text-primary hover:text-background transition-colors"
+        className="rounded-md p-1 hover:bg-black hover:text-white transition-colors"
       >
         <ChevronLeftIcon className="h-5 w-5" />
         <span className="sr-only">Previous month</span>
@@ -31,7 +31,7 @@ export default function MonthSelector() {
 
       <button
         onClick={handleNextMonth}
-        className="rounded-md p-1 hover:bg-primary text-primary hover:text-background transition-colors"
+        className="rounded-md p-1 hover:bg-black hover:text-white transition-colors"
       >
         <ChevronRightIcon className="h-5 w-5" />
         <span className="sr-only">Next month</span>

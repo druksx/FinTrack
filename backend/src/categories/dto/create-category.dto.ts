@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateCategoryDto {
   @ApiProperty({
     example: 'Groceries',
-    description: 'The name of the category',
+    description: 'Display name for the category',
     minLength: 1,
     maxLength: 50,
   })
@@ -15,7 +15,7 @@ export class CreateCategoryDto {
 
   @ApiProperty({
     example: '#65CE55',
-    description: 'Hex color code for the category',
+    description: 'Hex color code for visual representation',
     pattern: '^#[0-9A-Fa-f]{6}$',
   })
   @IsString()
@@ -24,7 +24,9 @@ export class CreateCategoryDto {
 
   @ApiProperty({
     example: 'ShoppingCart',
-    description: 'Lucide icon name for the category',
+    description: 'Icon name from Lucide icon set for visual representation',
+    minLength: 1,
+    maxLength: 50
   })
   @IsString()
   @MinLength(1)
