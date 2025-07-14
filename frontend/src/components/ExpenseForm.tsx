@@ -25,7 +25,8 @@ import * as z from "zod";
 import CategoryDialog from "./AddCategoryDialog";
 import { CATEGORY_ICONS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
-import { API_ENDPOINTS } from "@/lib/api";
+import { apiClient, API_ENDPOINTS } from "@/lib/api";
+import { useUser } from "@/lib/UserContext";
 
 interface Category {
   id: string;
@@ -68,6 +69,7 @@ export default function ExpenseForm({
   const [editingCategory, setEditingCategory] = useState<Category | undefined>(
     undefined
   );
+  const { user, isLoading: userLoading } = useUser();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -81,8 +83,10 @@ export default function ExpenseForm({
   });
 
   const fetchCategories = async () => {
+    if (!user) return;
+
     try {
-      const response = await fetch("/api/categories");
+      const response = await apiClient.get(API_ENDPOINTS.CATEGORIES, user.id);
       if (!response.ok) {
         throw new Error("Failed to fetch categories");
       }
@@ -94,10 +98,13 @@ export default function ExpenseForm({
   };
 
   const handleDeleteCategory = async (id: string, name: string) => {
+    if (!user) return;
+
     try {
-      const response = await fetch(`/api/categories/${id}`, {
-        method: "DELETE",
-      });
+      const response = await apiClient.delete(
+        `${API_ENDPOINTS.CATEGORIES}/${id}`,
+        user.id
+      );
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
@@ -137,8 +144,11 @@ export default function ExpenseForm({
   };
 
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    // Only fetch categories when user context has finished loading
+    if (!userLoading && user) {
+      fetchCategories();
+    }
+  }, [user, userLoading]);
 
   return (
     <>

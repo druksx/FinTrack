@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Post, Delete, Param, Put } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOkResponse, ApiTags, ApiNotFoundResponse, ApiConflictResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { Body, Controller, Get, Post, Delete, Param, Put, Headers } from '@nestjs/common';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags, ApiNotFoundResponse, ApiConflictResponse, ApiOperation, ApiParam, ApiHeader } from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { CategoryDto } from './dto/category.dto';
@@ -32,8 +32,9 @@ export class CategoriesController {
     description: 'Category created successfully',
     type: CategoryDto,
   })
-  create(@Body() createCategoryDto: CreateCategoryDto): Promise<CategoryDto> {
-    return this.categoriesService.create(createCategoryDto);
+  @ApiHeader({ name: 'x-user-id', description: 'User ID', required: true })
+  create(@Body() createCategoryDto: CreateCategoryDto, @Headers('x-user-id') userId: string): Promise<CategoryDto> {
+    return this.categoriesService.create(createCategoryDto, userId);
   }
 
   @Get()
@@ -45,8 +46,9 @@ export class CategoriesController {
     description: 'List of categories',
     type: [CategoryDto],
   })
-  findAll(): Promise<CategoryDto[]> {
-    return this.categoriesService.findAll();
+  @ApiHeader({ name: 'x-user-id', description: 'User ID', required: true })
+  findAll(@Headers('x-user-id') userId: string): Promise<CategoryDto[]> {
+    return this.categoriesService.findAll(userId);
   }
 
   @Delete(':id')
@@ -68,8 +70,9 @@ export class CategoriesController {
   @ApiConflictResponse({
     description: 'Cannot delete category because it has linked expenses',
   })
-  deleteOne(@Param() params: CategoryIdParam): Promise<void> {
-    return this.categoriesService.deleteOne(params.id);
+  @ApiHeader({ name: 'x-user-id', description: 'User ID', required: true })
+  deleteOne(@Param() params: CategoryIdParam, @Headers('x-user-id') userId: string): Promise<void> {
+    return this.categoriesService.deleteOne(params.id, userId);
   }
 
   @Put(':id')
@@ -89,7 +92,8 @@ export class CategoriesController {
   @ApiNotFoundResponse({
     description: 'Category not found',
   })
-  update(@Param() params: CategoryIdParam, @Body() updateCategoryDto: CreateCategoryDto): Promise<CategoryDto> {
-    return this.categoriesService.update(params.id, updateCategoryDto);
+  @ApiHeader({ name: 'x-user-id', description: 'User ID', required: true })
+  update(@Param() params: CategoryIdParam, @Body() updateCategoryDto: CreateCategoryDto, @Headers('x-user-id') userId: string): Promise<CategoryDto> {
+    return this.categoriesService.update(params.id, updateCategoryDto, userId);
   }
 }

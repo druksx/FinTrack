@@ -1,9 +1,9 @@
-import { Body, Controller, Get, Post, Put, Delete, Query, Param } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Delete, Query, Param, Headers } from '@nestjs/common';
 import { ExpensesService } from './expenses.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { ExpenseDto } from './dto/expense.dto';
 import { DashboardDataDto } from './dto/dashboard.dto';
-import { ApiOperation, ApiResponse, ApiTags, ApiNotFoundResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags, ApiNotFoundResponse, ApiHeader } from '@nestjs/swagger';
 import { IsOptional, Matches } from 'class-validator';
 
 class GetExpensesQuery {
@@ -22,42 +22,49 @@ export class ExpensesController {
   @Post()
   @ApiOperation({ summary: 'Create a new expense' })
   @ApiResponse({ status: 201, type: ExpenseDto })
-  create(@Body() createExpenseDto: CreateExpenseDto): Promise<ExpenseDto> {
-    return this.expensesService.create(createExpenseDto);
+  @ApiHeader({ name: 'x-user-id', description: 'User ID', required: true })
+  create(@Body() createExpenseDto: CreateExpenseDto, @Headers('x-user-id') userId: string): Promise<ExpenseDto> {
+    return this.expensesService.create(createExpenseDto, userId);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all expenses for a specific month' })
   @ApiResponse({ status: 200, type: [ExpenseDto] })
-  findAll(@Query() query: GetExpensesQuery): Promise<ExpenseDto[]> {
-    return this.expensesService.findAll(query.month);
+  @ApiHeader({ name: 'x-user-id', description: 'User ID', required: true })
+  findAll(@Query() query: GetExpensesQuery, @Headers('x-user-id') userId: string): Promise<ExpenseDto[]> {
+    return this.expensesService.findAll(userId, query.month);
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Update an expense' })
   @ApiResponse({ status: 200, type: ExpenseDto })
   @ApiNotFoundResponse({ description: 'Expense not found' })
-  update(@Param('id') id: string, @Body() updateExpenseDto: CreateExpenseDto): Promise<ExpenseDto> {
-    return this.expensesService.update(id, updateExpenseDto);
+  @ApiHeader({ name: 'x-user-id', description: 'User ID', required: true })
+  update(@Param('id') id: string, @Body() updateExpenseDto: CreateExpenseDto, @Headers('x-user-id') userId: string): Promise<ExpenseDto> {
+    return this.expensesService.update(id, updateExpenseDto, userId);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete an expense' })
   @ApiResponse({ status: 200, description: 'Expense deleted successfully' })
   @ApiNotFoundResponse({ description: 'Expense not found' })
-  delete(@Param('id') id: string): Promise<void> {
-    return this.expensesService.delete(id);
+  @ApiHeader({ name: 'x-user-id', description: 'User ID', required: true })
+  delete(@Param('id') id: string, @Headers('x-user-id') userId: string): Promise<void> {
+    return this.expensesService.delete(id, userId);
   }
 
   @Get('dashboard')
-  @ApiOperation({ summary: 'Get dashboard data with expense summaries and trends' })
+  @ApiOperation({ summary: 'Get dashboard data including current month stats and comparisons' })
   @ApiResponse({ status: 200, type: DashboardDataDto })
-  getDashboardData(@Query() query: GetExpensesQuery): Promise<DashboardDataDto> {
-    return this.expensesService.getDashboardData(query.month);
+  @ApiHeader({ name: 'x-user-id', description: 'User ID', required: true })
+  getDashboardData(@Query() query: GetExpensesQuery, @Headers('x-user-id') userId: string): Promise<DashboardDataDto> {
+    return this.expensesService.getDashboardData(userId, query.month);
   }
 
   @Get('export')
-  async getExpensesForExport(@Query('month') month: string) {
-    return this.expensesService.getExpensesForExport(month);
+  @ApiOperation({ summary: 'Export expenses as CSV for a specific month' })
+  @ApiHeader({ name: 'x-user-id', description: 'User ID', required: true })
+  async getExpensesForExport(@Query('month') month: string, @Headers('x-user-id') userId: string) {
+    return this.expensesService.getExpensesForExport(userId, month);
   }
 }

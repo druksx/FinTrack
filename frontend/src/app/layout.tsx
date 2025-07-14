@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import { MonthProvider } from "@/lib/MonthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { UserProvider } from "@/lib/UserContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,6 +14,19 @@ export const metadata: Metadata = {
   title: "FinTrack - Personal Finance Manager",
   description: "Track and manage your personal finances with ease",
 };
+
+function LayoutContent({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <div className="container mx-auto max-w-7xl px-4 py-6">
+        <div className="rounded-2xl border bg-card p-6 shadow-lg">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function RootLayout({
   children,
@@ -22,28 +36,21 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <TooltipProvider delayDuration={0}>
-            <MonthProvider>
-              <div className="min-h-screen bg-primary/5 px-4 pt-2">
-                <div className="container mx-auto max-w-7xl space-y-4">
-                  <div className="rounded-2xl border bg-secondary/10 p-4 shadow-sm">
-                    <Navbar />
-                  </div>
-                  <div className="rounded-2xl border bg-background p-4 shadow-sm">
-                    {children}
-                  </div>
-                </div>
-              </div>
-              <Toaster />
-            </MonthProvider>
-          </TooltipProvider>
-        </ThemeProvider>
+        <UserProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <TooltipProvider delayDuration={0}>
+              <MonthProvider>
+                <LayoutContent>{children}</LayoutContent>
+                <Toaster />
+              </MonthProvider>
+            </TooltipProvider>
+          </ThemeProvider>
+        </UserProvider>
       </body>
     </html>
   );

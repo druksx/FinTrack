@@ -7,6 +7,8 @@ import AddExpenseDialog from "./AddExpenseDialog";
 import { useMonth } from "@/lib/MonthContext";
 import { CATEGORY_ICONS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
+import { apiClient, API_ENDPOINTS } from "@/lib/api";
+import { useUser } from "@/lib/UserContext";
 
 interface Category {
   id: string;
@@ -26,6 +28,7 @@ interface Expense {
 
 export default function ExpenseList() {
   const { monthString } = useMonth();
+  const { user, isLoading: userLoading } = useUser();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,9 +39,17 @@ export default function ExpenseList() {
   const { toast } = useToast();
 
   const fetchExpenses = async () => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/expenses?month=${monthString}`);
+      const response = await apiClient.get(
+        `${API_ENDPOINTS.EXPENSES}?month=${monthString}`,
+        user.id
+      );
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
@@ -59,10 +70,13 @@ export default function ExpenseList() {
   };
 
   const handleDeleteExpense = async (id: string) => {
+    if (!user) return;
+
     try {
-      const response = await fetch(`/api/expenses/${id}`, {
-        method: "DELETE",
-      });
+      const response = await apiClient.delete(
+        `${API_ENDPOINTS.EXPENSES}/${id}`,
+        user.id
+      );
 
       if (!response.ok) {
         throw new Error("Failed to delete expense");
@@ -89,10 +103,14 @@ export default function ExpenseList() {
   };
 
   useEffect(() => {
-    fetchExpenses();
-  }, [monthString]);
+    // Only fetch expenses when user context has finished loading
+    if (!userLoading) {
+      fetchExpenses();
+    }
+  }, [monthString, user, userLoading]);
 
-  if (isLoading) {
+  // Show loading while user context is loading OR while fetching expenses
+  if (userLoading || isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -115,19 +133,20 @@ export default function ExpenseList() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3">
-          {expenses.map((expense) => {
-          const IconComponent = CATEGORY_ICONS[expense.category.icon] || BadgeQuestionMark;
-            return (
-              <div
-                key={expense.id}
+        {expenses.map((expense) => {
+          const IconComponent =
+            CATEGORY_ICONS[expense.category.icon] || BadgeQuestionMark;
+          return (
+            <div
+              key={expense.id}
               className="flex items-center gap-3 rounded-lg border bg-card p-3 pr-4"
-              >
+            >
               <div
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md"
                 style={{ backgroundColor: expense.category.color }}
               >
                 <IconComponent className="h-5 w-5 text-white" />
-                </div>
+              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
                   <div className="truncate">
@@ -136,16 +155,17 @@ export default function ExpenseList() {
                       {new Date(expense.date).toLocaleDateString()}
                     </p>
                     <div className="mt-1">
-                  <CategoryPill
-                    name={expense.category.name}
-                    color={expense.category.color}
-                    icon={expense.category.icon}
-                  />
-                </div>
+                      <CategoryPill
+                        name={expense.category.name}
+                        color={expense.category.color}
+                        icon={expense.category.icon}
+                      />
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <p className="font-medium whitespace-nowrap">
-                      ${Number(expense.amount).toLocaleString("en-US", {
+                      $
+                      {Number(expense.amount).toLocaleString("en-US", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}
@@ -165,12 +185,12 @@ export default function ExpenseList() {
                       </button>
                     </div>
                   </div>
-                  </div>
                 </div>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
+      </div>
 
       <AddExpenseDialog
         onExpenseAdded={fetchExpenses}

@@ -2,6 +2,8 @@ import { Download } from "lucide-react";
 import { Button } from "./ui/button";
 import { useMonth } from "@/lib/MonthContext";
 import { useToast } from "@/hooks/use-toast";
+import { apiClient, API_ENDPOINTS } from "@/lib/api";
+import { useUser } from "@/lib/UserContext";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -15,11 +17,17 @@ declare module "jspdf" {
 
 export default function ExportExpenses() {
   const { monthString } = useMonth();
+  const { user } = useUser();
   const { toast } = useToast();
 
   const fetchExpenses = async () => {
+    if (!user) throw new Error("User not authenticated");
+
     try {
-      const response = await fetch(`/api/expenses/export?month=${monthString}`);
+      const response = await apiClient.get(
+        `${API_ENDPOINTS.EXPENSES}/export?month=${monthString}`,
+        user.id
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch expenses");
       }

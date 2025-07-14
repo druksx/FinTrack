@@ -1,22 +1,25 @@
 'use client';
 
 import { useTheme } from "next-themes"
-import { MoonIcon, SunIcon } from "@radix-ui/react-icons"
+import { Moon, Sun } from "lucide-react"
+import { Button } from "./ui/button";
 
 export default function DarkSwitch() {
   const { theme, setTheme } = useTheme()
 
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="sm"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="rounded-md p-2 hover:bg-black hover:text-white transition-colors"
+      className="flex items-center justify-center"
     >
       {theme === "dark" ? (
-        <SunIcon className="h-5 w-5 text-background" />
+        <Sun className="h-4 w-4" />
       ) : (
-        <MoonIcon className="h-5 w-5" />
+        <Moon className="h-4 w-4" />
       )}
       <span className="sr-only">Toggle theme</span>
-    </button>
+    </Button>
   )
 }

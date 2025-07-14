@@ -11,15 +11,51 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  name      String?
-  password  String    // Hashed password
-  expenses  Expense[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id            String     @id @default(uuid())
+  email         String     @unique
+  name          String?
+  password      String?    // Optional for OAuth users
+  image         String?    // Profile picture from OAuth or uploaded
+  emailVerified DateTime?  // Email verification timestamp
+  expenses      Expense[]
+  categories    Category[]
+  subscriptions Subscription[]
+  accounts      Account[]  // OAuth accounts linked to this user
+  sessions      Session[]  // Active sessions
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
   @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
 }
 
 model Category {
@@ -27,11 +63,14 @@ model Category {
   name      String
   color     String
   icon      String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
   expenses  Expense[]
   subscriptions Subscription[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([userId])
   @@map("categories")
 }
 
@@ -61,11 +100,14 @@ model Subscription {
   recurrence  String   // "MONTHLY" or "ANNUALLY"
   startDate   DateTime // When the subscription started
   nextPayment DateTime // Next payment due date
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
   category    Category @relation(fields: [categoryId], references: [id])
   categoryId  String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([userId])
+  @@index([nextPayment])
   @@map("subscriptions")
-  @@index([categoryId])
 }

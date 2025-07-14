@@ -1,12 +1,40 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExpensesService } from './expenses.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { Decimal } from '@prisma/client/runtime/library';
+import { CreateExpenseDto } from './dto/create-expense.dto';
+import { NotFoundException } from '@nestjs/common';
+
+const TEST_USER_ID = '00000000-0000-0000-0000-000000000000';
 
 describe('ExpensesService', () => {
   let service: ExpensesService;
-  let prismaService: PrismaService;
-  const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000000';
+  let prisma: PrismaService;
+
+  const mockExpense = {
+    id: '1',
+    amount: 100,
+    date: new Date('2024-03-15'),
+    note: 'Test expense',
+    categoryId: 'cat1',
+    userId: TEST_USER_ID,
+    category: {
+      id: 'cat1',
+      name: 'Food',
+      icon: '🍕',
+    },
+  };
+
+  const mockPrismaService = {
+    expense: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      aggregate: jest.fn(),
+      groupBy: jest.fn(),
+    },
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -14,75 +42,72 @@ describe('ExpensesService', () => {
         ExpensesService,
         {
           provide: PrismaService,
-          useValue: {
-            expense: {
-              create: jest.fn().mockResolvedValue({
-                id: '1',
-                amount: new Decimal(100),
-                date: new Date(),
-                note: 'Test expense',
-                userId: DEFAULT_USER_ID,
-                categoryId: '1',
-                category: {
-                  id: '1',
-                  name: 'Test Category',
-                  color: '#000000',
-                  icon: 'Star',
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                },
-                createdAt: new Date(),
-                updatedAt: new Date(),
-              }),
-              findMany: jest.fn().mockResolvedValue([
-                {
-                  id: '1',
-                  amount: new Decimal(100),
-                  date: new Date(),
-                  note: 'Test expense',
-                  userId: DEFAULT_USER_ID,
-                  categoryId: '1',
-                  category: {
-                    id: '1',
-                    name: 'Test Category',
-                    color: '#000000',
-                    icon: 'Star',
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                  },
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                },
-              ]),
-            },
-          },
+          useValue: mockPrismaService,
         },
       ],
     }).compile();
 
     service = module.get<ExpensesService>(ExpensesService);
-    prismaService = module.get<PrismaService>(PrismaService);
+    prisma = module.get<PrismaService>(PrismaService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+  describe('create', () => {
+    it('should create an expense', async () => {
+      const createExpenseDto: CreateExpenseDto = {
+        amount: "100",
+        date: '2024-03-15',
+        categoryId: 'cat1',
+        note: 'Test expense',
+      };
 
-  it('should create an expense', async () => {
-    const date = new Date();
-    const expense = await service.create({
-      amount: "100",
-      date: date.toISOString(),
-      note: 'Test expense',
-      categoryId: '1',
+      mockPrismaService.expense.create.mockResolvedValue(mockExpense);
+
+      const result = await service.create(createExpenseDto, TEST_USER_ID);
+
+      expect(prisma.expense.create).toHaveBeenCalledWith({
+        data: {
+          amount: expect.any(Object), // Prisma.Decimal
+          date: expect.any(Date),
+          categoryId: 'cat1',
+          note: 'Test expense',
+          userId: TEST_USER_ID,
+        },
+        include: {
+          category: true,
+        },
+      });
+
+      expect(result).toEqual({
+        id: '1',
+        amount: 100,
+        date: '2024-03-15T00:00:00.000Z',
+        note: 'Test expense',
+        categoryId: 'cat1',
+        categoryName: 'Food',
+        categoryIcon: '🍕',
+      });
     });
-    expect(expense).toHaveProperty('id');
-    expect(expense.category).toHaveProperty('icon');
   });
 
-  it('should find all expenses', async () => {
-    const expenses = await service.findAll();
-    expect(expenses).toHaveLength(1);
-    expect(expenses[0].category).toHaveProperty('icon');
+  describe('findAll', () => {
+    it('should return all expenses for a user', async () => {
+      mockPrismaService.expense.findMany.mockResolvedValue([mockExpense]);
+
+      const result = await service.findAll(TEST_USER_ID);
+
+      expect(prisma.expense.findMany).toHaveBeenCalledWith({
+        where: {
+          userId: TEST_USER_ID,
+        },
+        include: {
+          category: true,
+        },
+        orderBy: {
+          date: 'desc',
+        },
+      });
+
+      expect(result).toHaveLength(1);
+    });
   });
 });

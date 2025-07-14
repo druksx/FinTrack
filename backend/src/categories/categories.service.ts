@@ -8,23 +8,27 @@ import { Prisma } from '@prisma/client';
 export class CategoriesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createCategoryDto: CreateCategoryDto): Promise<CategoryDto> {
+  async create(createCategoryDto: CreateCategoryDto, userId: string): Promise<CategoryDto> {
     return this.prisma.category.create({
-      data: createCategoryDto,
+      data: {
+        ...createCategoryDto,
+        userId,
+      },
     });
   }
 
-  async findAll(): Promise<CategoryDto[]> {
+  async findAll(userId: string): Promise<CategoryDto[]> {
     return this.prisma.category.findMany({
+      where: { userId },
       orderBy: { name: 'asc' },
     });
   }
 
-  async deleteOne(id: string): Promise<void> {
+  async deleteOne(id: string, userId: string): Promise<void> {
     try {
-      // First check if the category exists and has any expenses
-      const category = await this.prisma.category.findUnique({
-        where: { id },
+      // First check if the category exists and belongs to the user
+      const category = await this.prisma.category.findFirst({
+        where: { id, userId },
         include: { expenses: { take: 1 } }, // Only need to check if any exist
       });
 
@@ -52,10 +56,10 @@ export class CategoriesService {
     }
   }
 
-  async update(id: string, updateCategoryDto: CreateCategoryDto): Promise<CategoryDto> {
+  async update(id: string, updateCategoryDto: CreateCategoryDto, userId: string): Promise<CategoryDto> {
     try {
       return await this.prisma.category.update({
-        where: { id },
+        where: { id, userId },
         data: updateCategoryDto,
       });
     } catch (error) {

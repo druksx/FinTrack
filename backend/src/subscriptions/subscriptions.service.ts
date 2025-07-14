@@ -44,6 +44,7 @@ export class SubscriptionsService {
 
   async create(
     createSubscriptionDto: CreateSubscriptionDto,
+    userId: string,
   ): Promise<SubscriptionDto> {
     // Convert date string to ISO format
     const startDate = new Date(
@@ -65,6 +66,7 @@ export class SubscriptionsService {
         startDate,
         nextPayment,
         categoryId: createSubscriptionDto.categoryId,
+        userId,
       },
       include: {
         category: true,
@@ -74,8 +76,9 @@ export class SubscriptionsService {
     return this.mapToSubscriptionDto(subscription);
   }
 
-  async findAll(): Promise<SubscriptionDto[]> {
+  async findAll(userId: string): Promise<SubscriptionDto[]> {
     const subscriptions = await this.prisma.subscription.findMany({
+      where: { userId },
       include: {
         category: true,
       },
@@ -90,12 +93,14 @@ export class SubscriptionsService {
   async findAllForMonth(
     year: number,
     month: number,
+    userId: string,
   ): Promise<SubscriptionDto[]> {
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0);
 
     const subscriptions = await this.prisma.subscription.findMany({
       where: {
+        userId,
         OR: [
           // Monthly subscriptions
           {
@@ -168,6 +173,7 @@ export class SubscriptionsService {
   async update(
     id: string,
     updateData: Partial<CreateSubscriptionDto>,
+    userId: string,
   ): Promise<SubscriptionDto> {
     const existingSubscription = await this.prisma.subscription.findUnique({
       where: { id },
@@ -184,7 +190,10 @@ export class SubscriptionsService {
       where: { id },
       data: {
         name: updateData.name,
-        amount: updateData.amount !== undefined ? new Prisma.Decimal(updateData.amount) : undefined,
+        amount:
+          updateData.amount !== undefined
+            ? new Prisma.Decimal(updateData.amount)
+            : undefined,
         logoUrl: updateData.logoUrl,
         recurrence: updateData.recurrence,
         startDate: updateData.startDate ? startDate : undefined,
@@ -204,7 +213,7 @@ export class SubscriptionsService {
     return this.mapToSubscriptionDto(subscription);
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, userId: string): Promise<void> {
     await this.prisma.subscription.delete({
       where: { id },
     });

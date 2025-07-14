@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@radix-ui/react-icons";
 import ExpenseForm from "./ExpenseForm";
 import { useToast } from "@/hooks/use-toast";
+import { apiClient, API_ENDPOINTS } from "@/lib/api";
+import { useUser } from "@/lib/UserContext";
 
 interface Expense {
   id: string;
@@ -35,24 +37,31 @@ export default function AddExpenseDialog({
   editExpense,
 }: AddExpenseDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useUser();
   const { toast } = useToast();
 
   const handleSubmit = async (values: any) => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "User not authenticated",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const url = editExpense
-        ? `/api/expenses/${editExpense.id}`
-        : "/api/expenses";
+        ? `${API_ENDPOINTS.EXPENSES}/${editExpense.id}`
+        : API_ENDPOINTS.EXPENSES;
 
       const method = editExpense ? "PUT" : "POST";
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
+      const response =
+        method === "PUT"
+          ? await apiClient.put(url, values, user.id)
+          : await apiClient.post(url, values, user.id);
 
       if (!response.ok) {
         throw new Error(

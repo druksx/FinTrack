@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,11 +10,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { BadgeQuestionMark } from "lucide-react";
+import { BadgeQuestionMark, Search } from "lucide-react";
 import { CATEGORY_ICONS } from "@/lib/constants";
-import { API_ENDPOINTS } from "@/lib/api";
-import React from "react";
+import { useToast } from "@/hooks/use-toast";
+import { apiClient, API_ENDPOINTS } from "@/lib/api";
+import { useUser } from "@/lib/UserContext";
 
 interface CategoryDialogProps {
   isOpen: boolean;
@@ -30,13 +30,15 @@ interface CategoryDialogProps {
 
 interface IconInfo {
   name: string;
-  icon: typeof CATEGORY_ICONS[keyof typeof CATEGORY_ICONS];
+  icon: (typeof CATEGORY_ICONS)[keyof typeof CATEGORY_ICONS];
 }
 
-const allIcons: IconInfo[] = Object.entries(CATEGORY_ICONS).map(([name, icon]) => ({
-  name,
-  icon,
-}));
+const allIcons: IconInfo[] = Object.entries(CATEGORY_ICONS).map(
+  ([name, icon]) => ({
+    name,
+    icon,
+  })
+);
 
 export default function CategoryDialog({
   isOpen,
@@ -49,6 +51,7 @@ export default function CategoryDialog({
   const [selectedIcon, setSelectedIcon] = useState("");
   const [searchIcon, setSearchIcon] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useUser();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -74,33 +77,42 @@ export default function CategoryDialog({
       return;
     }
 
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "User not authenticated",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const url = editCategory 
-        ? `/api/categories/${editCategory.id}`
-        : "/api/categories";
-      
-      const method = editCategory ? "PUT" : "POST";
+      const categoryData = {
+        name,
+        color,
+        icon: selectedIcon,
+      };
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          color,
-          icon: selectedIcon,
-        }),
-      });
+      const response = editCategory
+        ? await apiClient.put(
+            `${API_ENDPOINTS.CATEGORIES}/${editCategory.id}`,
+            categoryData,
+            user.id
+          )
+        : await apiClient.post(API_ENDPOINTS.CATEGORIES, categoryData, user.id);
 
       if (!response.ok) {
-        throw new Error(editCategory ? "Failed to update category" : "Failed to create category");
+        throw new Error(
+          editCategory
+            ? "Failed to update category"
+            : "Failed to create category"
+        );
       }
 
       toast({
         title: editCategory ? "Category updated" : "Category added",
-        description: editCategory 
+        description: editCategory
           ? `Successfully updated category "${name}"`
           : `Successfully added category "${name}"`,
       });
@@ -112,11 +124,14 @@ export default function CategoryDialog({
       setSelectedIcon("");
       setSearchIcon("");
     } catch (error) {
-      console.error(editCategory ? "Error updating category:" : "Error adding category:", error);
+      console.error(
+        editCategory ? "Error updating category:" : "Error adding category:",
+        error
+      );
       toast({
         variant: "destructive",
         title: "Error",
-        description: editCategory 
+        description: editCategory
           ? "Failed to update category. Please try again."
           : "Failed to add category. Please try again.",
       });
@@ -148,7 +163,9 @@ export default function CategoryDialog({
           <div className="flex gap-6">
             {/* Left side - Preview */}
             <div className="w-1/3 space-y-4">
-              <div className="text-sm font-medium text-muted-foreground mb-2">Preview</div>
+              <div className="text-sm font-medium text-muted-foreground mb-2">
+                Preview
+              </div>
               <div className="rounded-xl border p-4 space-y-4">
                 <div
                   className="flex h-12 w-12 items-center justify-center rounded-xl"
@@ -164,13 +181,13 @@ export default function CategoryDialog({
                       })}
                     </div>
                   ) : (
-                    <div className="text-white text-xs text-center">Select an icon</div>
+                    <div className="text-white text-xs text-center">
+                      Select an icon
+                    </div>
                   )}
                 </div>
                 <div>
-                  <div className="font-medium">
-                    {name || "Category Name"}
-                  </div>
+                  <div className="font-medium">{name || "Category Name"}</div>
                   <div
                     className="text-sm mt-1"
                     style={{ color: color || "#000000" }}
@@ -222,7 +239,9 @@ export default function CategoryDialog({
                           onClick={() => {
                             setSelectedIcon(iconName);
                             if (!name) {
-                              setName(iconName.replace(/([A-Z])/g, ' $1').trim());
+                              setName(
+                                iconName.replace(/([A-Z])/g, " $1").trim()
+                              );
                             }
                           }}
                           className={`p-2 rounded-lg hover:bg-secondary flex items-center gap-2 transition-colors ${
@@ -241,7 +260,7 @@ export default function CategoryDialog({
                             })}
                           </div>
                           <span className="flex-1 truncate font-medium">
-                            {iconName.replace(/([A-Z])/g, ' $1').trim()}
+                            {iconName.replace(/([A-Z])/g, " $1").trim()}
                           </span>
                         </button>
                       );
@@ -285,9 +304,13 @@ export default function CategoryDialog({
               disabled={isSubmitting || !selectedIcon}
               className="bg-black text-white hover:bg-black/90"
             >
-              {isSubmitting 
-                ? (editCategory ? "Updating..." : "Adding...") 
-                : (editCategory ? "Update Category" : "Add Category")}
+              {isSubmitting
+                ? editCategory
+                  ? "Updating..."
+                  : "Adding..."
+                : editCategory
+                ? "Update Category"
+                : "Add Category"}
             </Button>
           </div>
         </form>

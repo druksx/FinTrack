@@ -11,19 +11,16 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ExpensesService {
-  // Temporary user ID until we implement authentication
-  private readonly DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000000';
-
   constructor(private prisma: PrismaService) {}
 
-  async create(createExpenseDto: CreateExpenseDto): Promise<ExpenseDto> {
+  async create(createExpenseDto: CreateExpenseDto, userId: string): Promise<ExpenseDto> {
     const expense = await this.prisma.expense.create({
       data: {
         amount: new Prisma.Decimal(createExpenseDto.amount),
         date: new Date(createExpenseDto.date),
         categoryId: createExpenseDto.categoryId,
         note: createExpenseDto.note,
-        userId: this.DEFAULT_USER_ID,
+        userId: userId,
       },
       include: {
         category: true,
@@ -33,7 +30,7 @@ export class ExpensesService {
     return this.mapToExpenseDto(expense);
   }
 
-  async findAll(month?: string): Promise<ExpenseDto[]> {
+  async findAll(userId: string, month?: string): Promise<ExpenseDto[]> {
     let dateFilter = {};
 
     if (month) {
@@ -52,7 +49,7 @@ export class ExpensesService {
     const expenses = await this.prisma.expense.findMany({
       where: {
         ...dateFilter,
-        userId: this.DEFAULT_USER_ID,
+        userId: userId,
       },
       include: {
         category: true,
@@ -63,7 +60,7 @@ export class ExpensesService {
     return expenses.map(this.mapToExpenseDto);
   }
 
-  async findAllForMonth(year: number, monthNum: number): Promise<ExpenseDto[]> {
+  async findAllForMonth(year: number, monthNum: number, userId: string): Promise<ExpenseDto[]> {
     const startDate = new Date(year, monthNum - 1, 1);
     const endDate = new Date(year, monthNum, 0);
 
@@ -189,7 +186,7 @@ export class ExpensesService {
     return allExpenses;
   }
 
-  async findAllForYear(year: number): Promise<ExpenseDto[]> {
+  async findAllForYear(year: number, userId: string): Promise<ExpenseDto[]> {
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year, 11, 31);
 
@@ -320,6 +317,7 @@ export class ExpensesService {
   async update(
     id: string,
     updateExpenseDto: CreateExpenseDto,
+    userId: string,
   ): Promise<ExpenseDto> {
     try {
       const expense = await this.prisma.expense.update({
@@ -346,7 +344,7 @@ export class ExpensesService {
     }
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, userId: string): Promise<void> {
     try {
       await this.prisma.expense.delete({
         where: { id },
@@ -361,7 +359,7 @@ export class ExpensesService {
     }
   }
 
-  async getDashboardData(month?: string): Promise<DashboardDataDto> {
+  async getDashboardData(userId: string, month?: string): Promise<DashboardDataDto> {
     const [year, monthNum] = month
       ? month.split('-').map(Number)
       : [new Date().getFullYear(), new Date().getMonth() + 1];
@@ -432,7 +430,7 @@ export class ExpensesService {
     // Get current month manual expenses total
     const currentMonthExpenses = await this.prisma.expense.aggregate({
       where: {
-        userId: this.DEFAULT_USER_ID,
+        userId: userId,
         date: {
           gte: currentMonthStart,
           lte: currentMonthEnd,
@@ -446,7 +444,7 @@ export class ExpensesService {
     // Get previous month manual expenses total
     const previousMonthExpenses = await this.prisma.expense.aggregate({
       where: {
-        userId: this.DEFAULT_USER_ID,
+        userId: userId,
         date: {
           gte: previousMonthStart,
           lte: previousMonthEnd,
@@ -467,7 +465,7 @@ export class ExpensesService {
     const manualExpenseCategoryTotals = await this.prisma.expense.groupBy({
       by: ['categoryId'],
       where: {
-        userId: this.DEFAULT_USER_ID,
+        userId: userId,
         date: {
           gte: currentMonthStart,
           lte: currentMonthEnd,
@@ -544,7 +542,7 @@ export class ExpensesService {
     const dailyExpenses = await this.prisma.expense.groupBy({
       by: ['date'],
       where: {
-        userId: this.DEFAULT_USER_ID,
+        userId: userId,
         date: {
           gte: currentMonthStart,
           lte: currentMonthEnd,
@@ -559,7 +557,7 @@ export class ExpensesService {
     const weekdayExpenses = await this.prisma.expense.groupBy({
       by: ['date'],
       where: {
-        userId: this.DEFAULT_USER_ID,
+        userId: userId,
         date: {
           gte: currentMonthStart,
           lte: currentMonthEnd,
@@ -612,7 +610,7 @@ export class ExpensesService {
     };
   }
 
-  async getExpensesForExport(month: string): Promise<any> {
+  async getExpensesForExport(userId: string, month: string): Promise<any> {
     const [year, monthNum] = month.split('-').map(Number);
     const startDate = new Date(year, monthNum - 1, 1);
     const endDate = new Date(year, monthNum, 0);

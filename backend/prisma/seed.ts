@@ -34,14 +34,21 @@ async function main() {
   });
   console.log('Created default user:', defaultUser);
 
-  // First, delete all existing categories
+  // First, delete all data in the right order (respecting foreign key constraints)
+  await prisma.subscription.deleteMany();
+  console.log('Cleared existing subscriptions');
+  await prisma.expense.deleteMany();
+  console.log('Cleared existing expenses');
   await prisma.category.deleteMany();
   console.log('Cleared existing categories');
 
-  // Then create new ones
+  // Then create new ones for the default user
   for (const category of defaultCategories) {
     await prisma.category.create({
-      data: category,
+      data: {
+        ...category,
+        userId: defaultUser.id,
+      },
     });
     console.log(`Created category: ${category.name}`);
   }

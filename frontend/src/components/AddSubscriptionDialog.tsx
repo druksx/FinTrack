@@ -12,8 +12,9 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import SubscriptionForm from "./SubscriptionForm";
-import { API_ENDPOINTS } from "@/lib/api";
+import { apiClient, API_ENDPOINTS } from "@/lib/api";
 import { Subscription } from "@/lib/types";
+import { useUser } from "@/lib/UserContext";
 
 interface AddSubscriptionDialogProps {
   onSubscriptionAdded?: () => void;
@@ -29,38 +30,48 @@ export default function AddSubscriptionDialog({
   editSubscription,
 }: AddSubscriptionDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useUser();
   const { toast } = useToast();
 
   const handleSubmit = async (data: any) => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "User not authenticated",
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
-      
+
       // Format the data for the API
       const formattedData = {
         ...data,
         // Convert amount to number and handle potential decimal places
         amount: Number(parseFloat(data.amount).toFixed(2)),
         // Ensure date is in the correct format
-        startDate: new Date(data.startDate).toISOString().split('T')[0],
+        startDate: new Date(data.startDate).toISOString().split("T")[0],
       };
 
-      const response = await fetch(
-        editSubscription
-          ? `/api/subscriptions/${editSubscription.id}`
-          : "/api/subscriptions",
-        {
-          method: editSubscription ? "PUT" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formattedData),
-        }
-      );
+      const response = editSubscription
+        ? await apiClient.put(
+            `${API_ENDPOINTS.SUBSCRIPTIONS}/${editSubscription.id}`,
+            formattedData,
+            user.id
+          )
+        : await apiClient.post(
+            API_ENDPOINTS.SUBSCRIPTIONS,
+            formattedData,
+            user.id
+          );
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.message || `Failed to ${editSubscription ? "update" : "create"} subscription`
+          errorData.message ||
+            `Failed to ${editSubscription ? "update" : "create"} subscription`
         );
       }
 
@@ -83,9 +94,12 @@ export default function AddSubscriptionDialog({
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : `Failed to ${
-          editSubscription ? "update" : "create"
-        } subscription. Please try again.`,
+        description:
+          error instanceof Error
+            ? error.message
+            : `Failed to ${
+                editSubscription ? "update" : "create"
+              } subscription. Please try again.`,
       });
     } finally {
       setIsSubmitting(false);

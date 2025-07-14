@@ -25,8 +25,9 @@ import * as z from "zod";
 import { CATEGORY_ICONS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
-import { API_ENDPOINTS } from "@/lib/api";
+import { apiClient, API_ENDPOINTS } from "@/lib/api";
 import { Subscription, Category } from "@/lib/types";
+import { useUser } from "@/lib/UserContext";
 
 interface SubscriptionFormProps {
   onSubmit: (data: any) => Promise<void>;
@@ -50,6 +51,7 @@ export default function SubscriptionForm({
 }: SubscriptionFormProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isSearchingLogo, setIsSearchingLogo] = useState(false);
+  const { user, isLoading: userLoading } = useUser();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -62,18 +64,24 @@ export default function SubscriptionForm({
       startDate: new Date().toISOString().split("T")[0],
       categoryId: "",
     },
-    values: defaultValues ? {
-      ...defaultValues,
-      // Ensure amount is a string for the form input
-      amount: defaultValues.amount.toString(),
-      // Ensure date is in YYYY-MM-DD format
-      startDate: new Date(defaultValues.startDate).toISOString().split("T")[0],
-    } : undefined,
+    values: defaultValues
+      ? {
+          ...defaultValues,
+          // Ensure amount is a string for the form input
+          amount: defaultValues.amount.toString(),
+          // Ensure date is in YYYY-MM-DD format
+          startDate: new Date(defaultValues.startDate)
+            .toISOString()
+            .split("T")[0],
+        }
+      : undefined,
   });
 
   const fetchCategories = async () => {
+    if (!user) return;
+
     try {
-      const response = await fetch("/api/categories");
+      const response = await apiClient.get(API_ENDPOINTS.CATEGORIES, user.id);
       if (!response.ok) {
         throw new Error("Failed to fetch categories");
       }
@@ -186,8 +194,11 @@ export default function SubscriptionForm({
   };
 
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    // Only fetch categories when user context has finished loading
+    if (!userLoading && user) {
+      fetchCategories();
+    }
+  }, [user, userLoading]);
 
   return (
     <Form {...form}>

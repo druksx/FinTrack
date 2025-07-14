@@ -15,6 +15,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { useTheme } from "next-themes";
 
 interface DailyExpense {
   date: string;
@@ -48,6 +49,14 @@ interface ExpenseChartsProps {
 }
 
 export default function ExpenseCharts({ data }: ExpenseChartsProps) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  // Theme-aware colors
+  const textColor = isDark ? "#ffffff" : "#000000";
+  const gridColor = isDark ? "#374151" : "#e5e7eb";
+  const backgroundColor = isDark ? "#1f2937" : "#ffffff";
+
   // Process daily expenses data
   const dailyExpensesData = data.charts.dailyExpenses.map((day) => ({
     date: new Date(day.date).toLocaleDateString("en-US", {
@@ -74,19 +83,23 @@ export default function ExpenseCharts({ data }: ExpenseChartsProps) {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Daily Expenses Line Chart */}
       <div className="rounded-xl border bg-card p-4 shadow-sm md:col-span-2">
-        <h3 className="text-sm font-semibold mb-2">Daily Expenses</h3>
+        <h3 className="text-sm font-semibold mb-2 text-foreground">Daily Expenses</h3>
         <div className="h-[250px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={dailyExpensesData}>
-              <CartesianGrid strokeDasharray="3 3" />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
               <XAxis
                 dataKey="date"
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: textColor }}
                 interval={"preserveStartEnd"}
+                axisLine={{ stroke: gridColor }}
+                tickLine={{ stroke: gridColor }}
               />
               <YAxis
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: textColor }}
                 tickFormatter={(value) => `$${value}`}
+                axisLine={{ stroke: gridColor }}
+                tickLine={{ stroke: gridColor }}
               />
               <Tooltip
                 formatter={(value: number) =>
@@ -95,59 +108,82 @@ export default function ExpenseCharts({ data }: ExpenseChartsProps) {
                     maximumFractionDigits: 2,
                   })}`
                 }
+                contentStyle={{
+                  backgroundColor: backgroundColor,
+                  border: `1px solid ${gridColor}`,
+                  borderRadius: "8px",
+                  color: textColor,
+                }}
               />
               <Line
                 type="monotone"
                 dataKey="total"
-                stroke="#000"
+                stroke={isDark ? "#60a5fa" : "#3b82f6"}
                 strokeWidth={2}
-                dot={false}
+                dot={{ fill: isDark ? "#60a5fa" : "#3b82f6", strokeWidth: 2 }}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Category Distribution Pie Chart */}
+      {/* Weekday Averages Bar Chart */}
       <div className="rounded-xl border bg-card p-4 shadow-sm">
-        <h3 className="text-sm font-semibold mb-2">Category Distribution</h3>
-        <div className="h-[250px]">
+        <h3 className="text-sm font-semibold mb-2 text-foreground">Average by Day</h3>
+        <div className="h-[200px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={weekdayData}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis
+                dataKey="day"
+                tick={{ fontSize: 12, fill: textColor }}
+                axisLine={{ stroke: gridColor }}
+                tickLine={{ stroke: gridColor }}
+              />
+              <YAxis
+                tick={{ fontSize: 12, fill: textColor }}
+                tickFormatter={(value) => `$${value}`}
+                axisLine={{ stroke: gridColor }}
+                tickLine={{ stroke: gridColor }}
+              />
+              <Tooltip
+                formatter={(value: number) =>
+                  `$${value.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}`
+                }
+                contentStyle={{
+                  backgroundColor: backgroundColor,
+                  border: `1px solid ${gridColor}`,
+                  borderRadius: "8px",
+                  color: textColor,
+                }}
+              />
+              <Bar
+                dataKey="average"
+                fill={isDark ? "#34d399" : "#10b981"}
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Category Breakdown Pie Chart */}
+      <div className="rounded-xl border bg-card p-4 shadow-sm">
+        <h3 className="text-sm font-semibold mb-2 text-foreground">Top Categories</h3>
+        <div className="h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={categoryData}
-                dataKey="value"
-                nameKey="name"
                 cx="50%"
                 cy="50%"
-                outerRadius={80}
-                label={({
-                  cx,
-                  cy,
-                  midAngle = 0,
-                  innerRadius,
-                  outerRadius,
-                  value,
-                  name,
-                }) => {
-                  const RADIAN = Math.PI / 180;
-                  const radius = 25 + innerRadius + (outerRadius - innerRadius);
-                  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                  const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-                  return (
-                    <text
-                      x={x}
-                      y={y}
-                      className="text-xs"
-                      fill="#888"
-                      textAnchor={x > cx ? "start" : "end"}
-                      dominantBaseline="central"
-                    >
-                      {name}
-                    </text>
-                  );
-                }}
+                innerRadius={40}
+                outerRadius={70}
+                paddingAngle={2}
+                dataKey="value"
               >
                 {categoryData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
@@ -160,34 +196,20 @@ export default function ExpenseCharts({ data }: ExpenseChartsProps) {
                     maximumFractionDigits: 2,
                   })}`
                 }
+                contentStyle={{
+                  backgroundColor: backgroundColor,
+                  border: `1px solid ${gridColor}`,
+                  borderRadius: "8px",
+                  color: textColor,
+                }}
+              />
+              <Legend
+                wrapperStyle={{
+                  fontSize: "12px",
+                  color: textColor,
+                }}
               />
             </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Weekday Average Bar Chart */}
-      <div className="rounded-xl border bg-card p-4 shadow-sm">
-        <h3 className="text-sm font-semibold mb-2">Average by Day</h3>
-        <div className="h-[250px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={weekdayData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-              <YAxis
-                tick={{ fontSize: 12 }}
-                tickFormatter={(value) => `$${value}`}
-              />
-              <Tooltip
-                formatter={(value: number) =>
-                  `$${value.toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`
-                }
-              />
-              <Bar dataKey="average" fill="#000" radius={[4, 4, 0, 0]} />
-            </BarChart>
           </ResponsiveContainer>
         </div>
       </div>

@@ -7,7 +7,7 @@ export async function PUT(
   try {
     const body = await request.json();
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/expenses/${params.id}`,
+      `${process.env.API_URL || process.env.NEXT_PUBLIC_API_URL}/expenses/${params.id}`,
       {
         method: 'PUT',
         headers: {
@@ -38,7 +38,7 @@ export async function DELETE(
 ) {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/expenses/${params.id}`,
+      `${process.env.API_URL || process.env.NEXT_PUBLIC_API_URL}/expenses/${params.id}`,
       {
         method: 'DELETE',
         headers: {

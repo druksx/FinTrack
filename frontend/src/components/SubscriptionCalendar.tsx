@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useMonth } from "@/lib/MonthContext";
-import { BadgeQuestionMark, Pencil, Trash2 } from "lucide-react";
+import { BadgeQuestionMark, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import Image from "next/image";
-import { API_ENDPOINTS } from "@/lib/api";
+import { apiClient, API_ENDPOINTS } from "@/lib/api";
+import { useUser } from "@/lib/UserContext";
 import {
   Tooltip,
   TooltipContent,
@@ -29,12 +30,15 @@ interface CalendarDay {
 
 export default function SubscriptionCalendar() {
   const { monthString } = useMonth();
+  const { user, isLoading: userLoading } = useUser();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [calendar, setCalendar] = useState<CalendarDay[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null);
+  const [selectedSubscription, setSelectedSubscription] =
+    useState<Subscription | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const { toast } = useToast();
 
   // Function to generate calendar days
@@ -57,11 +61,17 @@ export default function SubscriptionCalendar() {
   };
 
   const fetchSubscriptions = async () => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       const [year, month] = monthString.split("-");
-      const response = await fetch(
-        `/api/subscriptions/month?year=${year}&month=${month}`
+      const response = await apiClient.get(
+        `${API_ENDPOINTS.SUBSCRIPTIONS}/month?year=${year}&month=${month}`,
+        user.id
       );
 
       if (!response.ok) {
@@ -80,23 +90,28 @@ export default function SubscriptionCalendar() {
   };
 
   useEffect(() => {
-    fetchSubscriptions();
-  }, [monthString]);
+    // Only fetch subscriptions when user context has finished loading
+    if (!userLoading) {
+      fetchSubscriptions();
+    }
+  }, [monthString, user, userLoading]);
 
   const handleDeleteSubscription = async (id: string) => {
+    if (!user) return;
+
     try {
-      const response = await fetch(`/api/subscriptions/${id}`, {
-        method: "DELETE",
-      });
+      const response = await apiClient.delete(
+        `${API_ENDPOINTS.SUBSCRIPTIONS}/${id}`,
+        user.id
+      );
 
       if (!response.ok) {
         throw new Error("Failed to delete subscription");
       }
 
       setSelectedSubscription(null);
-      const [year, month] = monthString.split("-");
       await fetchSubscriptions();
-      
+
       toast({
         title: "Success",
         description: "Subscription deleted successfully",
@@ -122,7 +137,8 @@ export default function SubscriptionCalendar() {
     await fetchSubscriptions();
   };
 
-  if (isLoading) {
+  // Show loading while user context is loading OR while fetching subscriptions
+  if (userLoading || isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -144,14 +160,44 @@ export default function SubscriptionCalendar() {
 
   return (
     <div className="space-y-4">
+      {/* Calendar Header with Collapse Button */}
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">
+          {subscriptions.length > 0 && (
+            <>
+              ${subscriptions.reduce((total, sub) => total + Number(sub.amount), 0).toFixed(2)} this month
+            </>
+          )}
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="flex items-center gap-2"
+        >
+          {isCollapsed ? (
+            <>
+              <ChevronDown className="h-4 w-4" />
+              Show Calendar
+            </>
+          ) : (
+            <>
+              <ChevronUp className="h-4 w-4" />
+              Hide Calendar
+            </>
+          )}
+        </Button>
+      </div>
+
       {/* Calendar Grid */}
-      <div className="rounded-lg border bg-card overflow-hidden">
+      {!isCollapsed && (
+        <div className="rounded-lg border bg-card overflow-hidden">
         {/* Week day headers */}
         <div className="grid grid-cols-7 gap-px border-b bg-muted">
           {weekDays.map((day) => (
             <div
               key={day}
-              className="bg-background p-2 text-center text-xs font-medium text-muted-foreground"
+              className="bg-background p-1.5 text-center text-xs font-medium text-muted-foreground"
             >
               {day}
             </div>
@@ -162,24 +208,29 @@ export default function SubscriptionCalendar() {
         <div className="grid grid-cols-7 gap-px bg-muted">
           {/* Empty cells for days before the first of the month */}
           {Array.from({ length: firstDayOfMonth }).map((_, index) => (
-            <div key={`empty-start-${index}`} className="bg-background p-2 min-h-[80px]" />
+            <div
+              key={`empty-start-${index}`}
+              className="bg-background p-1 min-h-[50px]"
+            />
           ))}
-          
+
           {/* Current month days */}
           {calendar.map((day, index) => (
             <div
               key={index}
-              className="min-h-[80px] bg-background p-2 relative"
+              className="min-h-[50px] bg-background p-1 relative"
             >
-              <div className="font-medium text-xs mb-1 text-muted-foreground">{day.date}</div>
-              <div className="flex flex-wrap gap-1">
+              <div className="font-medium text-xs mb-1 text-muted-foreground">
+                {day.date}
+              </div>
+              <div className="flex flex-wrap gap-0.5">
                 {day.subscriptions.map((subscription) => (
                   <Tooltip key={subscription.id}>
                     <TooltipTrigger asChild>
                       <div
                         role="button"
                         tabIndex={0}
-                        className="w-6 h-6 rounded-md flex items-center justify-center cursor-pointer transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="w-5 h-5 rounded-sm flex items-center justify-center cursor-pointer transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary"
                         style={{
                           backgroundColor: subscription.category.color,
                         }}
@@ -189,12 +240,12 @@ export default function SubscriptionCalendar() {
                           <Image
                             src={subscription.logoUrl}
                             alt={subscription.name}
-                            width={16}
-                            height={16}
+                            width={12}
+                            height={12}
                             className="rounded-sm"
                           />
                         ) : (
-                          <BadgeQuestionMark className="w-3 h-3 text-white" />
+                          <BadgeQuestionMark className="w-2.5 h-2.5 text-white" />
                         )}
                       </div>
                     </TooltipTrigger>
@@ -202,7 +253,8 @@ export default function SubscriptionCalendar() {
                       <div className="space-y-1">
                         <div className="font-medium">{subscription.name}</div>
                         <div className="text-xs opacity-90">
-                          ${Number(subscription.amount).toFixed(2)} • {subscription.recurrence.toLowerCase()}
+                          ${Number(subscription.amount).toFixed(2)} •{" "}
+                          {subscription.recurrence.toLowerCase()}
                         </div>
                         <div className="text-xs opacity-90">
                           {subscription.category.name}
@@ -216,9 +268,13 @@ export default function SubscriptionCalendar() {
           ))}
         </div>
       </div>
+      )}
 
       {/* Subscription Details Dialog */}
-      <Dialog open={selectedSubscription !== null} onOpenChange={(open) => !open && setSelectedSubscription(null)}>
+      <Dialog
+        open={selectedSubscription !== null}
+        onOpenChange={(open) => !open && setSelectedSubscription(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Subscription Details</DialogTitle>
@@ -228,7 +284,9 @@ export default function SubscriptionCalendar() {
               <div className="flex items-center space-x-4">
                 <div
                   className="w-12 h-12 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: selectedSubscription.category.color }}
+                  style={{
+                    backgroundColor: selectedSubscription.category.color,
+                  }}
                 >
                   {selectedSubscription.logoUrl ? (
                     <Image
@@ -243,7 +301,9 @@ export default function SubscriptionCalendar() {
                   )}
                 </div>
                 <div>
-                  <h3 className="font-medium text-lg">{selectedSubscription.name}</h3>
+                  <h3 className="font-medium text-lg">
+                    {selectedSubscription.name}
+                  </h3>
                   <p className="text-sm text-muted-foreground">
                     {selectedSubscription.category.name}
                   </p>
@@ -253,22 +313,30 @@ export default function SubscriptionCalendar() {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-muted-foreground">Amount</p>
-                  <p className="font-medium">${Number(selectedSubscription.amount).toFixed(2)}</p>
+                  <p className="font-medium">
+                    ${Number(selectedSubscription.amount).toFixed(2)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Recurrence</p>
-                  <p className="font-medium">{selectedSubscription.recurrence.toLowerCase()}</p>
+                  <p className="font-medium">
+                    {selectedSubscription.recurrence.toLowerCase()}
+                  </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Start Date</p>
                   <p className="font-medium">
-                    {new Date(selectedSubscription.startDate).toLocaleDateString()}
+                    {new Date(
+                      selectedSubscription.startDate
+                    ).toLocaleDateString()}
                   </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Next Payment</p>
                   <p className="font-medium">
-                    {new Date(selectedSubscription.nextPayment).toLocaleDateString()}
+                    {new Date(
+                      selectedSubscription.nextPayment
+                    ).toLocaleDateString()}
                   </p>
                 </div>
               </div>
@@ -283,7 +351,9 @@ export default function SubscriptionCalendar() {
                 </Button>
                 <Button
                   variant="destructive"
-                  onClick={() => handleDeleteSubscription(selectedSubscription.id)}
+                  onClick={() =>
+                    handleDeleteSubscription(selectedSubscription.id)
+                  }
                   data-delete="true"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />

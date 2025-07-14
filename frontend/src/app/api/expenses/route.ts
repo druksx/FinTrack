@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/expenses?month=${month}`, {
+    const response = await fetch(`${process.env.API_URL || process.env.NEXT_PUBLIC_API_URL}/expenses?month=${month}`, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/expenses`, {
+    const response = await fetch(`${process.env.API_URL || process.env.NEXT_PUBLIC_API_URL}/expenses`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useMonth } from "@/lib/MonthContext";
+import { apiClient, API_ENDPOINTS } from "@/lib/api";
+import { useUser } from "@/lib/UserContext";
 import { ArrowDown, ArrowUp, BadgeQuestionMark, CircleDot } from "lucide-react";
 import { CATEGORY_ICONS } from "@/lib/constants";
 import ExpenseCharts from "./ExpenseCharts";
@@ -45,15 +47,24 @@ interface ChartData {
 
 export default function DashboardCards() {
   const { monthString } = useMonth();
+  const { user, isLoading: userLoading } = useUser();
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/expenses/dashboard?month=${monthString}`);
+        const response = await apiClient.get(
+          `${API_ENDPOINTS.EXPENSES}/dashboard?month=${monthString}`,
+          user.id
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch dashboard data");
         }
@@ -67,10 +78,14 @@ export default function DashboardCards() {
       }
     };
 
-    fetchDashboardData();
-  }, [monthString]);
+    // Only fetch dashboard data when user context has finished loading
+    if (!userLoading) {
+      fetchDashboardData();
+    }
+  }, [monthString, user, userLoading]);
 
-  if (isLoading) {
+  // Show loading while user context is loading OR while fetching dashboard data
+  if (userLoading || isLoading) {
     return (
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -104,9 +119,15 @@ export default function DashboardCards() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Total Expenses Card */}
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
-          <h3 className="text-sm font-medium text-muted-foreground mb-3">Total Expenses</h3>
+          <h3 className="text-sm font-medium text-muted-foreground mb-3">
+            Total Expenses
+          </h3>
           <div className="text-2xl font-bold mb-3">
-            ${Number(data.totalExpenses).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            $
+            {Number(data.totalExpenses).toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
           </div>
           <div className="flex items-center gap-2 text-sm">
             {data.monthComparison.percentageChange > 0 ? (
@@ -120,29 +141,42 @@ export default function DashboardCards() {
               <>
                 <ArrowDown className="h-4 w-4 text-green-500" />
                 <span className="text-green-500">
-                  {Math.abs(data.monthComparison.percentageChange)}% from last month
+                  {Math.abs(data.monthComparison.percentageChange)}% from last
+                  month
                 </span>
               </>
             ) : (
-              <span className="text-muted-foreground">No change from last month</span>
+              <span className="text-muted-foreground">
+                No change from last month
+              </span>
             )}
           </div>
         </div>
 
         {/* Month Comparison Card */}
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
-          <h3 className="text-sm font-medium text-muted-foreground mb-3">Month Comparison</h3>
+          <h3 className="text-sm font-medium text-muted-foreground mb-3">
+            Month Comparison
+          </h3>
           <div className="space-y-3">
             <div>
               <p className="text-sm text-muted-foreground">Current Month</p>
               <p className="text-xl font-bold">
-                ${Number(data.monthComparison.currentMonth).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                $
+                {Number(data.monthComparison.currentMonth).toLocaleString(
+                  "en-US",
+                  { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+                )}
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Previous Month</p>
               <p className="text-xl font-bold">
-                ${Number(data.monthComparison.previousMonth).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                $
+                {Number(data.monthComparison.previousMonth).toLocaleString(
+                  "en-US",
+                  { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+                )}
               </p>
             </div>
           </div>
@@ -150,7 +184,9 @@ export default function DashboardCards() {
 
         {/* Top Category Card */}
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
-          <h3 className="text-sm font-medium text-muted-foreground mb-3">Top Category</h3>
+          <h3 className="text-sm font-medium text-muted-foreground mb-3">
+            Top Category
+          </h3>
           {data.topCategories[0] && (
             <div className="space-y-3">
               <div className="flex items-center gap-3">
@@ -159,7 +195,8 @@ export default function DashboardCards() {
                   style={{ backgroundColor: data.topCategories[0].color }}
                 >
                   {(() => {
-                    const IconComponent = CATEGORY_ICONS[data.topCategories[0].icon] || CircleDot;
+                    const IconComponent =
+                      CATEGORY_ICONS[data.topCategories[0].icon] || CircleDot;
                     return <IconComponent className="h-5 w-5 text-white" />;
                   })()}
                 </div>
@@ -171,7 +208,11 @@ export default function DashboardCards() {
                 </div>
               </div>
               <p className="text-xl font-bold">
-                ${Number(data.topCategories[0].total).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                $
+                {Number(data.topCategories[0].total).toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </p>
             </div>
           )}
@@ -182,4 +223,4 @@ export default function DashboardCards() {
       {data && <ExpenseCharts data={data} />}
     </div>
   );
-} 
+}
