@@ -18,6 +18,7 @@ FinTrack is a modern web application for tracking personal expenses, managing su
 ## Tech Stack
 
 ### Frontend
+
 - Next.js 15 (App Router)
 - TypeScript
 - Tailwind CSS
@@ -26,6 +27,7 @@ FinTrack is a modern web application for tracking personal expenses, managing su
 - Lucide React icons
 
 ### Backend
+
 - NestJS
 - TypeScript
 - Prisma ORM
@@ -36,6 +38,7 @@ FinTrack is a modern web application for tracking personal expenses, managing su
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
+
 - Node.js (v20 or higher)
 - npm
 - Docker and Docker Compose (recommended)
@@ -46,17 +49,20 @@ Before you begin, ensure you have the following installed:
 ### Quick Start with Docker (Recommended)
 
 1. **Clone the repository:**
+
    ```bash
    git clone <your-repo-url>
    cd FinTrack
    ```
 
 2. **Start the application:**
+
    ```bash
    docker-compose up --build
    ```
 
 3. **Access the application:**
+
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:3333
    - Database: localhost:5432
@@ -71,29 +77,31 @@ Before you begin, ensure you have the following installed:
 If you prefer to run without Docker:
 
 1. **Install dependencies:**
+
    ```bash
    # Backend
    cd backend
    npm install
-   
+
    # Frontend
    cd ../frontend
    npm install
    ```
 
 2. **Set up environment variables:**
+
    ```bash
-   # Backend (.env)
-   DATABASE_URL="postgresql://username:password@localhost:5432/fintrack"
-   JWT_SECRET="your-secret-key"
-   PORT=3333
+   # Copy example environment files
+   cp backend/.env.example backend/.env
+   cp frontend/.env.example frontend/.env.local
    
-   # Frontend (.env.local)
-   NEXT_PUBLIC_API_URL="http://localhost:3333"
-   API_URL="http://localhost:3333"
+   # Edit the files with your actual values:
+   # backend/.env - Update DATABASE_URL and JWT_SECRET
+   # frontend/.env.local - Update API URLs and any OAuth credentials
    ```
 
 3. **Set up the database:**
+
    ```bash
    cd backend
    npx prisma migrate dev
@@ -101,37 +109,79 @@ If you prefer to run without Docker:
    ```
 
 4. **Start the servers:**
+
    ```bash
    # Backend (terminal 1)
    cd backend
    npm run start:dev
-   
+
    # Frontend (terminal 2)
    cd frontend
    npm run dev
    ```
 
+## Environment Configuration
+
+### Backend (.env)
+Copy `backend/.env.example` to `backend/.env` and configure:
+
+```bash
+# Database Configuration
+DATABASE_URL="postgresql://username:password@localhost:5432/fintrack"
+
+# JWT Configuration - Use a strong secret in production
+JWT_SECRET="your-super-secret-jwt-key-change-this-in-production"
+
+# Server Configuration
+PORT=3333
+NODE_ENV=development
+```
+
+### Frontend (.env.local)
+Copy `frontend/.env.example` to `frontend/.env.local` and configure:
+
+```bash
+# API Configuration
+NEXT_PUBLIC_API_URL=http://localhost:3333
+
+# NextAuth Configuration
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-nextauth-secret-key-change-this
+
+# OAuth Configuration (Optional - for social login)
+GITHUB_ID=your-github-oauth-app-id
+GITHUB_SECRET=your-github-oauth-app-secret
+GOOGLE_ID=your-google-oauth-client-id
+GOOGLE_SECRET=your-google-oauth-client-secret
+```
+
+**⚠️ Security Note:** Never commit actual `.env` files to version control. The `.env.example` files contain safe placeholder values only.
+
 ## Application Structure
 
 ### Authentication System
+
 - **Registration**: Create new user accounts with email and password
 - **Login**: Secure authentication with JWT tokens
 - **Profile Management**: Update user information and change passwords
 - **Session Persistence**: Stay logged in across browser sessions
 
 ### Expense Management
+
 - **Add Expenses**: Quick expense entry with categories and notes
 - **Edit/Delete**: Modify or remove existing expenses
 - **Categories**: Organize expenses with custom categories and colors
 - **Monthly View**: Filter expenses by month for better organization
 
 ### Subscription Tracking
+
 - **Recurring Subscriptions**: Track monthly and annual subscriptions
 - **Calendar View**: Visual calendar showing upcoming payments
 - **Cost Analysis**: See total monthly subscription costs
 - **Subscription Management**: Add, edit, and cancel subscriptions
 
 ### Analytics & Reports
+
 - **Dashboard Cards**: Overview of total expenses and comparisons
 - **Interactive Charts**: Line charts, bar charts, and pie charts
 - **Export Options**: Generate PDF reports of your expenses
@@ -140,15 +190,18 @@ If you prefer to run without Docker:
 ## API Endpoints
 
 ### Authentication
+
 - `POST /auth/register` - Register new user
 - `POST /auth/login` - User login
 
 ### Users
+
 - `GET /users/profile` - Get user profile
 - `PUT /users/profile` - Update user profile
 - `PUT /users/password` - Change password
 
 ### Expenses
+
 - `GET /expenses` - Get user expenses
 - `POST /expenses` - Create new expense
 - `PUT /expenses/:id` - Update expense
@@ -157,12 +210,14 @@ If you prefer to run without Docker:
 - `GET /expenses/export` - Export expenses
 
 ### Categories
+
 - `GET /categories` - Get user categories
 - `POST /categories` - Create category
 - `PUT /categories/:id` - Update category
 - `DELETE /categories/:id` - Delete category
 
 ### Subscriptions
+
 - `GET /subscriptions` - Get user subscriptions
 - `POST /subscriptions` - Create subscription
 - `PUT /subscriptions/:id` - Update subscription
@@ -174,6 +229,7 @@ If you prefer to run without Docker:
 ### Available Scripts
 
 **Frontend:**
+
 ```bash
 npm run dev        # Start development server
 npm run build      # Build for production
@@ -182,6 +238,7 @@ npm run lint       # Run ESLint
 ```
 
 **Backend:**
+
 ```bash
 npm run start:dev  # Start development server
 npm run build      # Build for production
@@ -212,6 +269,7 @@ docker-compose down -v
 ## Database Schema
 
 The application uses PostgreSQL with the following main tables:
+
 - **users** - User accounts and authentication
 - **categories** - Expense categories (user-specific)
 - **expenses** - Individual expense records
@@ -224,4 +282,3 @@ The application uses PostgreSQL with the following main tables:
 - **User Isolation**: All data is user-specific and isolated
 - **Input Validation**: All API endpoints validate input data
 - **CORS Protection**: Proper CORS configuration for API security
-
