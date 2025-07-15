@@ -22,7 +22,6 @@ export default function Navbar() {
     router.push("/");
   };
 
-  // Don't show navbar while loading or if user is not authenticated
   if (isLoading || !user) {
     return null;
   }

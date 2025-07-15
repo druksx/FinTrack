@@ -23,7 +23,7 @@ interface Expense {
   date: string;
   note: string;
   amount: string;
-  categoryId: string; // Added this field
+  categoryId: string;
   category: Category;
 }
 
@@ -84,7 +84,7 @@ export default function ExpenseList() {
         throw new Error("Failed to delete expense");
       }
 
-      refreshAll(); // Refresh all components that display expense data
+      refreshAll();
       toast({
         title: "Expense deleted",
         description: "Successfully deleted the expense.",
@@ -105,13 +105,11 @@ export default function ExpenseList() {
   };
 
   useEffect(() => {
-    // Only fetch expenses when user context has finished loading
     if (!userLoading) {
       fetchExpenses();
     }
   }, [userLoading, expensesRefreshKey, fetchExpenses]);
 
-  // Show loading while user context is loading OR while fetching expenses
   if (userLoading || isLoading) {
     return (
       <div className="flex items-center justify-center h-64">

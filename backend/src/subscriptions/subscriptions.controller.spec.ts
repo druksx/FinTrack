@@ -75,7 +75,10 @@ describe('SubscriptionsController', () => {
       const result = await controller.create(createSubscriptionDto, userId);
 
       expect(result).toEqual(mockSubscription);
-      expect(mockSubscriptionsService.create).toHaveBeenCalledWith(createSubscriptionDto, userId);
+      expect(mockSubscriptionsService.create).toHaveBeenCalledWith(
+        createSubscriptionDto,
+        userId,
+      );
     });
 
     it('should create a subscription without logo', async () => {
@@ -95,12 +98,17 @@ describe('SubscriptionsController', () => {
         logoUrl: undefined,
       };
 
-      mockSubscriptionsService.create.mockResolvedValue(subscriptionWithoutLogo);
+      mockSubscriptionsService.create.mockResolvedValue(
+        subscriptionWithoutLogo,
+      );
 
       const result = await controller.create(createSubscriptionDto, userId);
 
       expect(result).toEqual(subscriptionWithoutLogo);
-      expect(mockSubscriptionsService.create).toHaveBeenCalledWith(createSubscriptionDto, userId);
+      expect(mockSubscriptionsService.create).toHaveBeenCalledWith(
+        createSubscriptionDto,
+        userId,
+      );
     });
 
     it('should create an annual subscription', async () => {
@@ -126,7 +134,10 @@ describe('SubscriptionsController', () => {
       const result = await controller.create(createSubscriptionDto, userId);
 
       expect(result).toEqual(annualSubscription);
-      expect(mockSubscriptionsService.create).toHaveBeenCalledWith(createSubscriptionDto, userId);
+      expect(mockSubscriptionsService.create).toHaveBeenCalledWith(
+        createSubscriptionDto,
+        userId,
+      );
     });
 
     it('should handle service errors', async () => {
@@ -139,9 +150,13 @@ describe('SubscriptionsController', () => {
         categoryId: 'cat123',
       };
 
-      mockSubscriptionsService.create.mockRejectedValue(new Error('Database error'));
+      mockSubscriptionsService.create.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(controller.create(createSubscriptionDto, userId)).rejects.toThrow('Database error');
+      await expect(
+        controller.create(createSubscriptionDto, userId),
+      ).rejects.toThrow('Database error');
     });
   });
 
@@ -172,9 +187,13 @@ describe('SubscriptionsController', () => {
     it('should handle service errors', async () => {
       const userId = 'user123';
 
-      mockSubscriptionsService.findAll.mockRejectedValue(new Error('Database error'));
+      mockSubscriptionsService.findAll.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(controller.findAll(userId)).rejects.toThrow('Database error');
+      await expect(controller.findAll(userId)).rejects.toThrow(
+        'Database error',
+      );
     });
   });
 
@@ -190,7 +209,11 @@ describe('SubscriptionsController', () => {
       const result = await controller.findAllForMonth(year, month, userId);
 
       expect(result).toEqual(subscriptions);
-      expect(mockSubscriptionsService.findAllForMonth).toHaveBeenCalledWith(2024, 3, userId);
+      expect(mockSubscriptionsService.findAllForMonth).toHaveBeenCalledWith(
+        2024,
+        3,
+        userId,
+      );
     });
 
     it('should handle different year and month values', async () => {
@@ -204,7 +227,11 @@ describe('SubscriptionsController', () => {
       const result = await controller.findAllForMonth(year, month, userId);
 
       expect(result).toEqual(subscriptions);
-      expect(mockSubscriptionsService.findAllForMonth).toHaveBeenCalledWith(2023, 12, userId);
+      expect(mockSubscriptionsService.findAllForMonth).toHaveBeenCalledWith(
+        2023,
+        12,
+        userId,
+      );
     });
 
     it('should return empty array when no subscriptions for month', async () => {
@@ -217,7 +244,11 @@ describe('SubscriptionsController', () => {
       const result = await controller.findAllForMonth(year, month, userId);
 
       expect(result).toEqual([]);
-      expect(mockSubscriptionsService.findAllForMonth).toHaveBeenCalledWith(2024, 1, userId);
+      expect(mockSubscriptionsService.findAllForMonth).toHaveBeenCalledWith(
+        2024,
+        1,
+        userId,
+      );
     });
 
     it('should handle service errors', async () => {
@@ -225,9 +256,13 @@ describe('SubscriptionsController', () => {
       const year = '2024';
       const month = '3';
 
-      mockSubscriptionsService.findAllForMonth.mockRejectedValue(new Error('Database error'));
+      mockSubscriptionsService.findAllForMonth.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(controller.findAllForMonth(year, month, userId)).rejects.toThrow('Database error');
+      await expect(
+        controller.findAllForMonth(year, month, userId),
+      ).rejects.toThrow('Database error');
     });
   });
 
@@ -248,10 +283,18 @@ describe('SubscriptionsController', () => {
 
       mockSubscriptionsService.update.mockResolvedValue(updatedSubscription);
 
-      const result = await controller.update(subscriptionId, updateData, userId);
+      const result = await controller.update(
+        subscriptionId,
+        updateData,
+        userId,
+      );
 
       expect(result).toEqual(updatedSubscription);
-      expect(mockSubscriptionsService.update).toHaveBeenCalledWith(subscriptionId, updateData, userId);
+      expect(mockSubscriptionsService.update).toHaveBeenCalledWith(
+        subscriptionId,
+        updateData,
+        userId,
+      );
     });
 
     it('should update subscription with partial data', async () => {
@@ -268,10 +311,18 @@ describe('SubscriptionsController', () => {
 
       mockSubscriptionsService.update.mockResolvedValue(updatedSubscription);
 
-      const result = await controller.update(subscriptionId, updateData, userId);
+      const result = await controller.update(
+        subscriptionId,
+        updateData,
+        userId,
+      );
 
       expect(result).toEqual(updatedSubscription);
-      expect(mockSubscriptionsService.update).toHaveBeenCalledWith(subscriptionId, updateData, userId);
+      expect(mockSubscriptionsService.update).toHaveBeenCalledWith(
+        subscriptionId,
+        updateData,
+        userId,
+      );
     });
 
     it('should update subscription recurrence', async () => {
@@ -291,10 +342,18 @@ describe('SubscriptionsController', () => {
 
       mockSubscriptionsService.update.mockResolvedValue(updatedSubscription);
 
-      const result = await controller.update(subscriptionId, updateData, userId);
+      const result = await controller.update(
+        subscriptionId,
+        updateData,
+        userId,
+      );
 
       expect(result).toEqual(updatedSubscription);
-      expect(mockSubscriptionsService.update).toHaveBeenCalledWith(subscriptionId, updateData, userId);
+      expect(mockSubscriptionsService.update).toHaveBeenCalledWith(
+        subscriptionId,
+        updateData,
+        userId,
+      );
     });
 
     it('should handle service errors', async () => {
@@ -304,9 +363,13 @@ describe('SubscriptionsController', () => {
         name: 'Netflix Premium',
       };
 
-      mockSubscriptionsService.update.mockRejectedValue(new Error('Subscription not found'));
+      mockSubscriptionsService.update.mockRejectedValue(
+        new Error('Subscription not found'),
+      );
 
-      await expect(controller.update(subscriptionId, updateData, userId)).rejects.toThrow('Subscription not found');
+      await expect(
+        controller.update(subscriptionId, updateData, userId),
+      ).rejects.toThrow('Subscription not found');
     });
   });
 
@@ -320,16 +383,23 @@ describe('SubscriptionsController', () => {
       const result = await controller.delete(subscriptionId, userId);
 
       expect(result).toBeUndefined();
-      expect(mockSubscriptionsService.delete).toHaveBeenCalledWith(subscriptionId, userId);
+      expect(mockSubscriptionsService.delete).toHaveBeenCalledWith(
+        subscriptionId,
+        userId,
+      );
     });
 
     it('should handle service errors', async () => {
       const userId = 'user123';
       const subscriptionId = 'nonexistent-id';
 
-      mockSubscriptionsService.delete.mockRejectedValue(new Error('Subscription not found'));
+      mockSubscriptionsService.delete.mockRejectedValue(
+        new Error('Subscription not found'),
+      );
 
-      await expect(controller.delete(subscriptionId, userId)).rejects.toThrow('Subscription not found');
+      await expect(controller.delete(subscriptionId, userId)).rejects.toThrow(
+        'Subscription not found',
+      );
     });
   });
-}); 
+});

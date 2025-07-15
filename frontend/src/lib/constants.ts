@@ -19,7 +19,6 @@ import {
   Dumbbell,
   BadgeQuestionMark,
   type LucideIcon,
-  // Adding more useful icons
   ShoppingCart,
   CreditCard,
   Receipt,
@@ -61,7 +60,6 @@ import {
   Cookie,
 } from "lucide-react";
 
-// Map of all available icons for the components to use
 export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   // Shopping & Retail
   ShoppingBag,

@@ -76,7 +76,6 @@ export default function ExpenseForm({
   const { refreshAll } = useRefresh();
   const { monthString } = useMonth();
 
-  // Smart date defaulting: today's date if viewing current month, otherwise 1st of selected month
   const getDefaultDate = () => {
     const today = new Date();
     const currentMonthString = `${today.getFullYear()}-${String(
@@ -84,10 +83,8 @@ export default function ExpenseForm({
     ).padStart(2, "0")}`;
 
     if (monthString === currentMonthString) {
-      // We're viewing the current month, default to today's date
       return today.toISOString().split("T")[0];
     } else {
-      // We're viewing a different month, default to 1st of that month
       return `${monthString}-01`;
     }
   };
@@ -144,7 +141,7 @@ export default function ExpenseForm({
       if (form.getValues("categoryId") === id) {
         form.setValue("categoryId", "");
       }
-      refreshAll(); // Refresh all components that display category data
+      refreshAll();
       toast({
         title: "Category deleted",
         description: `Category "${name}" has been deleted successfully.`,
@@ -165,7 +162,6 @@ export default function ExpenseForm({
   };
 
   useEffect(() => {
-    // Only fetch categories when user context has finished loading
     if (!userLoading && user) {
       fetchCategories();
     }

@@ -69,4 +69,4 @@ export class ExpenseDto {
     description: 'When the expense was created',
   })
   createdAt: string;
-} 
+}

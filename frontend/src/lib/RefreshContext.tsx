@@ -22,34 +22,31 @@ export function RefreshProvider({ children }: { children: React.ReactNode }) {
   const [subscriptionsRefreshKey, setSubscriptionsRefreshKey] = useState(0);
 
   const refreshDashboard = useCallback(() => {
-    setDashboardRefreshKey(prev => prev + 1);
+    setDashboardRefreshKey((prev) => prev + 1);
   }, []);
 
   const refreshExpenses = useCallback(() => {
-    setExpensesRefreshKey(prev => prev + 1);
+    setExpensesRefreshKey((prev) => prev + 1);
   }, []);
 
   const refreshSubscriptions = useCallback(() => {
-    setSubscriptionsRefreshKey(prev => prev + 1);
+    setSubscriptionsRefreshKey((prev) => prev + 1);
   }, []);
 
   const refreshExpenseData = useCallback(() => {
-    // Refresh dashboard and expenses with longer delay for smoother experience
-    setDashboardRefreshKey(prev => prev + 1);
-    setTimeout(() => setExpensesRefreshKey(prev => prev + 1), 250);
+    setDashboardRefreshKey((prev) => prev + 1);
+    setTimeout(() => setExpensesRefreshKey((prev) => prev + 1), 250);
   }, []);
 
   const refreshSubscriptionData = useCallback(() => {
-    // Refresh dashboard and subscriptions with longer delay for smoother experience
-    setDashboardRefreshKey(prev => prev + 1);
-    setTimeout(() => setSubscriptionsRefreshKey(prev => prev + 1), 250);
+    setDashboardRefreshKey((prev) => prev + 1);
+    setTimeout(() => setSubscriptionsRefreshKey((prev) => prev + 1), 250);
   }, []);
 
   const refreshAll = useCallback(() => {
-    // Refresh all components with longer staggered delays for smoother experience
-    setDashboardRefreshKey(prev => prev + 1);
-    setTimeout(() => setExpensesRefreshKey(prev => prev + 1), 300);
-    setTimeout(() => setSubscriptionsRefreshKey(prev => prev + 1), 600);
+    setDashboardRefreshKey((prev) => prev + 1);
+    setTimeout(() => setExpensesRefreshKey((prev) => prev + 1), 300);
+    setTimeout(() => setSubscriptionsRefreshKey((prev) => prev + 1), 600);
   }, []);
 
   return (
@@ -77,4 +74,4 @@ export function useRefresh() {
     throw new Error("useRefresh must be used within a RefreshProvider");
   }
   return context;
-} 
+}

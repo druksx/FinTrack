@@ -12,11 +12,9 @@ echo ""
 echo "Press Ctrl+C to stop all services"
 echo ""
 
-# Stop any existing containers
 echo "🛑 Stopping existing containers..."
 docker-compose down
 
-# Start production environment
 echo "🔧 Building and starting production environment..."
 docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --build
 

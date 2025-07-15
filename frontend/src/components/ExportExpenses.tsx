@@ -7,7 +7,6 @@ import { useUser } from "@/lib/UserContext";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
-// Add the type augmentation for jsPDF
 declare module "jspdf" {
   interface jsPDF {
     autoTable: typeof autoTable;
@@ -79,7 +78,6 @@ export default function ExportExpenses() {
     const expenses = await fetchExpenses();
     if (!expenses) return;
 
-    // Initialize PDF with A4 format
     const doc = new jsPDF("p", "mm", "a4");
     const monthDate = new Date(monthString + "-01");
     const monthName = monthDate.toLocaleString("default", {
@@ -87,11 +85,9 @@ export default function ExportExpenses() {
       year: "numeric",
     });
 
-    // Add title
     doc.setFontSize(16);
     doc.text(`Expenses for ${monthName}`, 14, 20);
 
-    // Calculate totals by type
     const totals = expenses.reduce(
       (acc: { manual: number; subscription: number }, expense: any) => {
         if (expense.type === "Manual Expense") {
@@ -104,7 +100,6 @@ export default function ExportExpenses() {
       { manual: 0, subscription: 0 }
     );
 
-    // Add table
     autoTable(doc, {
       startY: 30,
       head: [["Date", "Amount ($)", "Category", "Note", "Type"]],
@@ -119,7 +114,6 @@ export default function ExportExpenses() {
       headStyles: { fillColor: [23, 23, 23] },
     });
 
-    // Add summary
     const finalY = doc.lastAutoTable.finalY || 30;
     doc.setFontSize(12);
     doc.text("Summary:", 14, finalY + 10);
@@ -135,7 +129,6 @@ export default function ExportExpenses() {
       finalY + 40
     );
 
-    // Save the PDF
     doc.save(`expenses-${monthString}.pdf`);
 
     toast({

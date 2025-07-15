@@ -34,7 +34,6 @@ async function main() {
   });
   console.log('Created default user:', defaultUser);
 
-  // First, delete all data in the right order (respecting foreign key constraints)
   await prisma.subscription.deleteMany();
   console.log('Cleared existing subscriptions');
   await prisma.expense.deleteMany();
@@ -42,7 +41,6 @@ async function main() {
   await prisma.category.deleteMany();
   console.log('Cleared existing categories');
 
-  // Then create new ones for the default user
   for (const category of defaultCategories) {
     await prisma.category.create({
       data: {

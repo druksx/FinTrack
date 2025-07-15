@@ -80,13 +80,11 @@ export default function DashboardCards() {
   }, [user, monthString]);
 
   useEffect(() => {
-    // Only fetch dashboard data when user context has finished loading
     if (!userLoading) {
       fetchDashboardData();
     }
   }, [userLoading, dashboardRefreshKey, fetchDashboardData]);
 
-  // Show loading while user context is loading OR while fetching dashboard data
   if (userLoading || isLoading) {
     return (
       <div className="space-y-4">
@@ -117,9 +115,7 @@ export default function DashboardCards() {
 
   return (
     <div className="space-y-6 transition-opacity duration-300">
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Total Expenses Card */}
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
           <h3 className="text-sm font-medium text-muted-foreground mb-3">
             Total Expenses
@@ -155,7 +151,6 @@ export default function DashboardCards() {
           </div>
         </div>
 
-        {/* Month Comparison Card */}
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
           <h3 className="text-sm font-medium text-muted-foreground mb-3">
             Month Comparison
@@ -184,7 +179,6 @@ export default function DashboardCards() {
           </div>
         </div>
 
-        {/* Top Category Card */}
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
           <h3 className="text-sm font-medium text-muted-foreground mb-3">
             Top Category
@@ -221,7 +215,6 @@ export default function DashboardCards() {
         </div>
       </div>
 
-      {/* Charts */}
       {data && <ExpenseCharts data={data} />}
     </div>
   );

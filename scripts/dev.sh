@@ -10,5 +10,4 @@ echo ""
 echo "Press Ctrl+C to stop all services"
 echo ""
 
-# Start development mode (uses docker-compose.override.yml automatically)
 docker-compose up

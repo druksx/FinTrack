@@ -17,8 +17,8 @@ export default function CategoryPill({
   icon,
   className = "",
 }: CategoryPillProps) {
-
-  const Icon = (Icons as unknown as Record<string, LucideIcon>)[icon] || BadgeQuestionMark;
+  const Icon =
+    (Icons as unknown as Record<string, LucideIcon>)[icon] || BadgeQuestionMark;
 
   return (
     <div

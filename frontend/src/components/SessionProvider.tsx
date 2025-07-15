@@ -7,16 +7,5 @@ export default function SessionProvider({
 }: {
   children: React.ReactNode;
 }) {
-  // Temporarily disable SessionProvider to test signup page
-  return <>{children}</>
-  
-  // return (
-  //   <NextAuthSessionProvider 
-  //     basePath="/api/auth"
-  //     refetchInterval={0}
-  //     refetchOnWindowFocus={false}
-  //   >
-  //     {children}
-  //   </NextAuthSessionProvider>
-  // )
+  return <>{children}</>;
 }

@@ -53,7 +53,6 @@ describe('SubscriptionsService', () => {
     service = module.get<SubscriptionsService>(SubscriptionsService);
     prismaService = module.get<PrismaService>(PrismaService);
 
-    // Mock the current date for consistent testing
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2024-03-01T00:00:00.000Z'));
   });
@@ -339,12 +338,12 @@ describe('SubscriptionsService', () => {
     it('should filter out subscriptions with invalid dates for the month', async () => {
       const userId = 'user123';
       const year = 2024;
-      const month = 2; // February (28 days)
+      const month = 2;
 
       const subscriptions = [
         {
           ...mockSubscription,
-          startDate: new Date('2024-01-31'), // Day 31 doesn't exist in February
+          startDate: new Date('2024-01-31'),
         },
       ];
 

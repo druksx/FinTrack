@@ -72,7 +72,7 @@ export default function AddExpenseDialog({
       }
 
       onOpenChange(false);
-      refreshAll(); // Refresh all components that display expense data
+      refreshAll();
       toast({
         title: editExpense ? "Expense updated" : "Expense added",
         description: editExpense

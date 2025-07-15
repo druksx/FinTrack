@@ -5,7 +5,6 @@ import { NotFoundException } from '@nestjs/common';
 import { UpdateProfileDto, ChangePasswordDto } from './dto/user.dto';
 import * as bcrypt from 'bcryptjs';
 
-// Mock bcrypt
 jest.mock('bcryptjs', () => ({
   hash: jest.fn(),
   compare: jest.fn(),
@@ -129,9 +128,13 @@ describe('UsersService', () => {
 
     it('should handle database errors', async () => {
       const userId = '123e4567-e89b-12d3-a456-426614174000';
-      mockPrismaService.user.findUnique.mockRejectedValue(new Error('Database error'));
+      mockPrismaService.user.findUnique.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(service.getProfile(userId)).rejects.toThrow('Database error');
+      await expect(service.getProfile(userId)).rejects.toThrow(
+        'Database error',
+      );
     });
   });
 
@@ -237,9 +240,13 @@ describe('UsersService', () => {
         email: 'updated@example.com',
       };
 
-      mockPrismaService.user.update.mockRejectedValue(new Error('Record not found'));
+      mockPrismaService.user.update.mockRejectedValue(
+        new Error('Record not found'),
+      );
 
-      await expect(service.updateProfile(userId, updateProfileDto)).rejects.toThrow('Record not found');
+      await expect(
+        service.updateProfile(userId, updateProfileDto),
+      ).rejects.toThrow('Record not found');
     });
 
     it('should handle duplicate email error', async () => {
@@ -252,7 +259,9 @@ describe('UsersService', () => {
       const prismaError = { code: 'P2002' };
       mockPrismaService.user.update.mockRejectedValue(prismaError);
 
-      await expect(service.updateProfile(userId, updateProfileDto)).rejects.toBe(prismaError);
+      await expect(
+        service.updateProfile(userId, updateProfileDto),
+      ).rejects.toBe(prismaError);
     });
   });
 
@@ -289,7 +298,10 @@ describe('UsersService', () => {
         userWithPassword.password,
       );
 
-      expect(bcrypt.hash).toHaveBeenCalledWith(changePasswordDto.newPassword, 12);
+      expect(bcrypt.hash).toHaveBeenCalledWith(
+        changePasswordDto.newPassword,
+        12,
+      );
 
       expect(mockPrismaService.user.update).toHaveBeenCalledWith({
         where: { id: userId },
@@ -308,7 +320,9 @@ describe('UsersService', () => {
 
       mockPrismaService.user.findUnique.mockResolvedValue(null);
 
-      await expect(service.changePassword(userId, changePasswordDto)).rejects.toThrow(
+      await expect(
+        service.changePassword(userId, changePasswordDto),
+      ).rejects.toThrow(
         new NotFoundException(`User with ID ${userId} not found`),
       );
 
@@ -330,9 +344,9 @@ describe('UsersService', () => {
 
       mockPrismaService.user.findUnique.mockResolvedValue(oauthUser);
 
-      await expect(service.changePassword(userId, changePasswordDto)).rejects.toThrow(
-        'User has no password set (OAuth user)',
-      );
+      await expect(
+        service.changePassword(userId, changePasswordDto),
+      ).rejects.toThrow('User has no password set (OAuth user)');
 
       expect(bcrypt.compare).not.toHaveBeenCalled();
       expect(bcrypt.hash).not.toHaveBeenCalled();
@@ -353,9 +367,9 @@ describe('UsersService', () => {
       mockPrismaService.user.findUnique.mockResolvedValue(userWithPassword);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      await expect(service.changePassword(userId, changePasswordDto)).rejects.toThrow(
-        'Invalid current password',
-      );
+      await expect(
+        service.changePassword(userId, changePasswordDto),
+      ).rejects.toThrow('Invalid current password');
 
       expect(bcrypt.compare).toHaveBeenCalledWith(
         changePasswordDto.currentPassword,
@@ -378,9 +392,13 @@ describe('UsersService', () => {
       };
 
       mockPrismaService.user.findUnique.mockResolvedValue(userWithPassword);
-      (bcrypt.compare as jest.Mock).mockRejectedValue(new Error('Bcrypt error'));
+      (bcrypt.compare as jest.Mock).mockRejectedValue(
+        new Error('Bcrypt error'),
+      );
 
-      await expect(service.changePassword(userId, changePasswordDto)).rejects.toThrow('Bcrypt error');
+      await expect(
+        service.changePassword(userId, changePasswordDto),
+      ).rejects.toThrow('Bcrypt error');
     });
 
     it('should handle database update errors', async () => {
@@ -398,9 +416,13 @@ describe('UsersService', () => {
       mockPrismaService.user.findUnique.mockResolvedValue(userWithPassword);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashedNewPassword');
-      mockPrismaService.user.update.mockRejectedValue(new Error('Database error'));
+      mockPrismaService.user.update.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(service.changePassword(userId, changePasswordDto)).rejects.toThrow('Database error');
+      await expect(
+        service.changePassword(userId, changePasswordDto),
+      ).rejects.toThrow('Database error');
     });
   });
-}); 
+});

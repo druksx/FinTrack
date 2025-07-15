@@ -57,7 +57,7 @@ describe('ExpensesService', () => {
   describe('create', () => {
     it('should create an expense', async () => {
       const createExpenseDto: CreateExpenseDto = {
-        amount: "100",
+        amount: '100',
         date: '2024-03-15',
         categoryId: 'cat1',
         note: 'Test expense',

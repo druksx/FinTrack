@@ -125,4 +125,3 @@ export class DashboardDataDto {
   })
   charts: DashboardChartsDto;
 }
- 

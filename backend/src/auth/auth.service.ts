@@ -57,7 +57,6 @@ export class AuthService {
       return null;
     }
 
-    // Return user without password
     const { password: _, ...userWithoutPassword } = user;
     return {
       ...userWithoutPassword,
@@ -67,7 +66,6 @@ export class AuthService {
   }
 
   async findOrCreateOAuthUser(oauthDto: OAuthDto) {
-    // Check if user exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email: oauthDto.email },
       select: {
@@ -81,7 +79,6 @@ export class AuthService {
     });
 
     if (existingUser) {
-      // Update user with latest OAuth data
       const updatedUser = await this.prisma.user.update({
         where: { id: existingUser.id },
         data: {
@@ -105,13 +102,12 @@ export class AuthService {
       };
     }
 
-    // Create new user
     const newUser = await this.prisma.user.create({
       data: {
         email: oauthDto.email,
         name: oauthDto.name || null,
         image: oauthDto.image || null,
-        password: null, // OAuth users don't have passwords
+        password: null,
       },
       select: {
         id: true,
@@ -130,4 +126,3 @@ export class AuthService {
     };
   }
 }
- 

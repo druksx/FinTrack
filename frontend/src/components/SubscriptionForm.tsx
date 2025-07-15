@@ -67,9 +67,7 @@ export default function SubscriptionForm({
     values: defaultValues
       ? {
           ...defaultValues,
-          // Ensure amount is a string for the form input
           amount: defaultValues.amount.toString(),
-          // Ensure date is in YYYY-MM-DD format
           startDate: new Date(defaultValues.startDate)
             .toISOString()
             .split("T")[0],
@@ -105,7 +103,6 @@ export default function SubscriptionForm({
 
     setIsSearchingLogo(true);
     try {
-      // Use Logo.dev API
       const domain = name.toLowerCase().replace(/[^a-z0-9]/g, "");
       const apiKey = process.env.NEXT_PUBLIC_LOGO_DEV_API_KEY;
 
@@ -113,12 +110,10 @@ export default function SubscriptionForm({
         throw new Error("Logo.dev API key not found");
       }
 
-      // First, search for the company using the API
       const searchUrl = `https://api.logo.dev/search?q=${domain}`;
 
-      // Create an AbortController to timeout the request
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       try {
         const response = await fetch(searchUrl, {
@@ -132,7 +127,6 @@ export default function SubscriptionForm({
         if (response.ok) {
           const data = await response.json();
           if (data && Array.isArray(data) && data.length > 0) {
-            // Use the first logo URL from the response
             const logoUrl = data[0].logo_url;
             if (logoUrl) {
               form.setValue("logoUrl", logoUrl);
@@ -146,12 +140,10 @@ export default function SubscriptionForm({
         }
         throw new Error("No logo found");
       } catch (error) {
-        // Log the actual error for debugging
         console.log("Logo fetch error:", error);
         console.log("Logo fetch failed, using fallback");
       }
 
-      // Fallback: Generate a colored circle with initials
       const colors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEEAD"];
       const randomColor = colors[Math.floor(Math.random() * colors.length)];
       const initials = name
@@ -194,7 +186,6 @@ export default function SubscriptionForm({
   };
 
   useEffect(() => {
-    // Only fetch categories when user context has finished loading
     if (!userLoading && user) {
       fetchCategories();
     }

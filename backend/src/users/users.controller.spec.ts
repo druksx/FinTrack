@@ -59,9 +59,13 @@ describe('UsersController', () => {
 
     it('should handle user not found', async () => {
       const userId = 'nonexistent-id';
-      mockUsersService.getProfile.mockRejectedValue(new Error('User not found'));
+      mockUsersService.getProfile.mockRejectedValue(
+        new Error('User not found'),
+      );
 
-      await expect(controller.getProfile(userId)).rejects.toThrow('User not found');
+      await expect(controller.getProfile(userId)).rejects.toThrow(
+        'User not found',
+      );
       expect(mockUsersService.getProfile).toHaveBeenCalledWith(userId);
     });
   });
@@ -85,7 +89,10 @@ describe('UsersController', () => {
       const result = await controller.updateProfile(userId, updateProfileDto);
 
       expect(result).toEqual(updatedUser);
-      expect(mockUsersService.updateProfile).toHaveBeenCalledWith(userId, updateProfileDto);
+      expect(mockUsersService.updateProfile).toHaveBeenCalledWith(
+        userId,
+        updateProfileDto,
+      );
     });
 
     it('should update profile with only name', async () => {
@@ -105,7 +112,10 @@ describe('UsersController', () => {
       const result = await controller.updateProfile(userId, updateProfileDto);
 
       expect(result).toEqual(updatedUser);
-      expect(mockUsersService.updateProfile).toHaveBeenCalledWith(userId, updateProfileDto);
+      expect(mockUsersService.updateProfile).toHaveBeenCalledWith(
+        userId,
+        updateProfileDto,
+      );
     });
 
     it('should handle email already exists error', async () => {
@@ -118,7 +128,9 @@ describe('UsersController', () => {
       const prismaError = { code: 'P2002' };
       mockUsersService.updateProfile.mockRejectedValue(prismaError);
 
-      await expect(controller.updateProfile(userId, updateProfileDto)).rejects.toThrow(
+      await expect(
+        controller.updateProfile(userId, updateProfileDto),
+      ).rejects.toThrow(
         new HttpException('Email already exists', HttpStatus.BAD_REQUEST),
       );
     });
@@ -130,10 +142,17 @@ describe('UsersController', () => {
         email: 'test@example.com',
       };
 
-      mockUsersService.updateProfile.mockRejectedValue(new Error('Database error'));
+      mockUsersService.updateProfile.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(controller.updateProfile(userId, updateProfileDto)).rejects.toThrow(
-        new HttpException('Failed to update profile', HttpStatus.INTERNAL_SERVER_ERROR),
+      await expect(
+        controller.updateProfile(userId, updateProfileDto),
+      ).rejects.toThrow(
+        new HttpException(
+          'Failed to update profile',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
       );
     });
   });
@@ -151,7 +170,10 @@ describe('UsersController', () => {
       const result = await controller.changePassword(userId, changePasswordDto);
 
       expect(result).toEqual({ message: 'Password changed successfully' });
-      expect(mockUsersService.changePassword).toHaveBeenCalledWith(userId, changePasswordDto);
+      expect(mockUsersService.changePassword).toHaveBeenCalledWith(
+        userId,
+        changePasswordDto,
+      );
     });
 
     it('should handle invalid current password', async () => {
@@ -161,9 +183,13 @@ describe('UsersController', () => {
         newPassword: 'newPassword123',
       };
 
-      mockUsersService.changePassword.mockRejectedValue(new Error('Invalid current password'));
+      mockUsersService.changePassword.mockRejectedValue(
+        new Error('Invalid current password'),
+      );
 
-      await expect(controller.changePassword(userId, changePasswordDto)).rejects.toThrow(
+      await expect(
+        controller.changePassword(userId, changePasswordDto),
+      ).rejects.toThrow(
         new HttpException('Invalid current password', HttpStatus.BAD_REQUEST),
       );
     });
@@ -175,10 +201,17 @@ describe('UsersController', () => {
         newPassword: 'newPassword123',
       };
 
-      mockUsersService.changePassword.mockRejectedValue(new Error('User not found'));
+      mockUsersService.changePassword.mockRejectedValue(
+        new Error('User not found'),
+      );
 
-      await expect(controller.changePassword(userId, changePasswordDto)).rejects.toThrow(
-        new HttpException('Failed to change password', HttpStatus.INTERNAL_SERVER_ERROR),
+      await expect(
+        controller.changePassword(userId, changePasswordDto),
+      ).rejects.toThrow(
+        new HttpException(
+          'Failed to change password',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
       );
     });
 
@@ -189,10 +222,17 @@ describe('UsersController', () => {
         newPassword: 'newPassword123',
       };
 
-      mockUsersService.changePassword.mockRejectedValue(new Error('User has no password set (OAuth user)'));
+      mockUsersService.changePassword.mockRejectedValue(
+        new Error('User has no password set (OAuth user)'),
+      );
 
-      await expect(controller.changePassword(userId, changePasswordDto)).rejects.toThrow(
-        new HttpException('Failed to change password', HttpStatus.INTERNAL_SERVER_ERROR),
+      await expect(
+        controller.changePassword(userId, changePasswordDto),
+      ).rejects.toThrow(
+        new HttpException(
+          'Failed to change password',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
       );
     });
 
@@ -203,11 +243,18 @@ describe('UsersController', () => {
         newPassword: 'newPassword123',
       };
 
-      mockUsersService.changePassword.mockRejectedValue(new Error('Database error'));
+      mockUsersService.changePassword.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(controller.changePassword(userId, changePasswordDto)).rejects.toThrow(
-        new HttpException('Failed to change password', HttpStatus.INTERNAL_SERVER_ERROR),
+      await expect(
+        controller.changePassword(userId, changePasswordDto),
+      ).rejects.toThrow(
+        new HttpException(
+          'Failed to change password',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
       );
     });
   });
-}); 
+});

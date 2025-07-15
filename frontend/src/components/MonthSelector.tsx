@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons"
-import { format } from "date-fns"
-import { useMonth } from "@/lib/MonthContext"
+import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
+import { format } from "date-fns";
+import { useMonth } from "@/lib/MonthContext";
 
 export default function MonthSelector() {
   const { currentDate, setCurrentDate } = useMonth();
 
   const handlePrevMonth = () => {
-    setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))
-  }
+    setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)));
+  };
 
   const handleNextMonth = () => {
-    setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))
-  }
+    setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)));
+  };
 
   return (
     <div className="flex items-center gap-2">
@@ -37,5 +37,5 @@ export default function MonthSelector() {
         <span className="sr-only">Next month</span>
       </button>
     </div>
-  )
-} 
+  );
+}

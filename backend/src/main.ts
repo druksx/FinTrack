@@ -7,22 +7,20 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Enable validation
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-    whitelist: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+    }),
+  );
 
-  // Enable CORS for frontend
   app.enableCors({
     origin: ['http://localhost:3000', 'http://frontend:3000'],
     credentials: true,
   });
 
-  // Apply global exception filter
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // Set up Swagger
   const config = new DocumentBuilder()
     .setTitle('FinTrack API')
     .setDescription('Personal expense tracker API')

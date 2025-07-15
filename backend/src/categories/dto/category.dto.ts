@@ -42,4 +42,4 @@ export class CategoryDto {
     description: 'Timestamp when the category was last updated'
   })
   updatedAt: Date;
-} 
+}

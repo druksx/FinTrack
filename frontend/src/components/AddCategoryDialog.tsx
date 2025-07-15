@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BadgeQuestionMark, Search } from "lucide-react";
+import { BadgeQuestionMark } from "lucide-react";
 import { CATEGORY_ICONS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient, API_ENDPOINTS } from "@/lib/api";
@@ -142,7 +142,6 @@ export default function CategoryDialog({
     }
   };
 
-  // Filter icons based on search
   const searchTerm = searchIcon.toLowerCase();
   const filteredIcons = allIcons.filter((icon) =>
     icon.name.toLowerCase().includes(searchTerm)
@@ -163,7 +162,6 @@ export default function CategoryDialog({
 
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
           <div className="flex gap-6">
-            {/* Left side - Preview */}
             <div className="w-1/3 space-y-4">
               <div className="text-sm font-medium text-muted-foreground mb-2">
                 Preview
@@ -200,7 +198,6 @@ export default function CategoryDialog({
               </div>
             </div>
 
-            {/* Right side - Form */}
             <div className="flex-1 space-y-4">
               <div className="space-y-4">
                 <div>

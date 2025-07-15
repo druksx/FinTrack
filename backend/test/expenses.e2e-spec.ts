@@ -20,14 +20,12 @@ describe('ExpensesController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     prisma = app.get(PrismaService);
 
-    // Apply the same middleware as in main.ts
     app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
     app.useGlobalFilters(new HttpExceptionFilter());
     app.enableCors({ origin: 'http://localhost:3000' });
 
     await app.init();
 
-    // Create test user
     await prisma.user.upsert({
       where: { id: TEST_USER_ID },
       update: {},
@@ -41,23 +39,21 @@ describe('ExpensesController (e2e)', () => {
   });
 
   beforeEach(async () => {
-    // Clean up and recreate test data before each test
     await prisma.expense.deleteMany();
     await prisma.category.deleteMany();
 
-    // Create a test category
     const category = await prisma.category.create({
       data: {
         name: 'Test Category',
         color: '#FF0000',
         icon: 'Star',
+        userId: TEST_USER_ID,
       },
     });
     categoryId = category.id;
   });
 
   afterAll(async () => {
-    // Clean up all test data
     await prisma.expense.deleteMany();
     await prisma.category.deleteMany();
     await prisma.user.deleteMany();
@@ -115,7 +111,6 @@ describe('ExpensesController (e2e)', () => {
 
   describe('/expenses (GET)', () => {
     beforeEach(async () => {
-      // Seed some test expenses
       await prisma.expense.create({
         data: {
           note: 'March Expense 1',
@@ -175,4 +170,4 @@ describe('ExpensesController (e2e)', () => {
         });
     });
   });
-}); 
+});

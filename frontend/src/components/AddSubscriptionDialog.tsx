@@ -49,12 +49,9 @@ export default function AddSubscriptionDialog({
     try {
       setIsSubmitting(true);
 
-      // Format the data for the API
       const formattedData = {
         ...data,
-        // Convert amount to number and handle potential decimal places
         amount: Number(parseFloat(data.amount).toFixed(2)),
-        // Ensure date is in the correct format
         startDate: new Date(data.startDate).toISOString().split("T")[0],
       };
 
@@ -89,7 +86,7 @@ export default function AddSubscriptionDialog({
         onSubscriptionAdded();
       }
 
-      refreshAll(); // Refresh all components that display subscription data
+      refreshAll();
     } catch (error) {
       console.error("Error submitting subscription:", error);
       toast({
@@ -104,11 +101,9 @@ export default function AddSubscriptionDialog({
       });
     } finally {
       setIsSubmitting(false);
-      // Close the dialog regardless of success or error
       if (onOpenChange) {
         onOpenChange(false);
       } else {
-        // For uncontrolled mode, use internal state
         setInternalOpen(false);
       }
     }

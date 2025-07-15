@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsIn, IsDateString, IsNumber, Min } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsIn,
+  IsDateString,
+  IsNumber,
+  Min,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateSubscriptionDto {
@@ -6,7 +13,7 @@ export class CreateSubscriptionDto {
     description: 'Name of the subscription service',
     example: 'Netflix',
     minLength: 1,
-    maxLength: 100
+    maxLength: 100,
   })
   @IsString()
   name: string;
@@ -14,7 +21,7 @@ export class CreateSubscriptionDto {
   @ApiProperty({
     description: 'Monthly billing amount',
     example: 15.99,
-    minimum: 0.01
+    minimum: 0.01,
   })
   @IsNumber()
   @Min(0.01)
@@ -23,7 +30,7 @@ export class CreateSubscriptionDto {
   @ApiProperty({
     description: 'URL to the subscription service logo',
     example: 'https://example.com/netflix-logo.png',
-    required: false
+    required: false,
   })
   @IsString()
   @IsOptional()
@@ -32,7 +39,7 @@ export class CreateSubscriptionDto {
   @ApiProperty({
     description: 'Billing frequency',
     enum: ['MONTHLY', 'ANNUALLY'],
-    example: 'MONTHLY'
+    example: 'MONTHLY',
   })
   @IsString()
   @IsIn(['MONTHLY', 'ANNUALLY'])
@@ -40,15 +47,15 @@ export class CreateSubscriptionDto {
 
   @ApiProperty({
     description: 'Date when the subscription starts',
-    example: '2024-03-15'
+    example: '2024-03-15',
   })
   @IsDateString()
   startDate: string;
 
   @ApiProperty({
     description: 'Category to assign expenses to when generated',
-    example: '123e4567-e89b-12d3-a456-426614174000'
+    example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @IsString()
   categoryId: string;
-} 
+}

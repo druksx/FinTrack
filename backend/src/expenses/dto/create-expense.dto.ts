@@ -9,7 +9,8 @@ export class CreateExpenseDto {
   })
   @IsString()
   @Matches(/^\d+(\.\d{1,2})?$/, {
-    message: 'Amount must be a valid decimal number with up to 2 decimal places',
+    message:
+      'Amount must be a valid decimal number with up to 2 decimal places',
   })
   amount: string;
 
@@ -40,4 +41,4 @@ export class CreateExpenseDto {
   @IsString()
   @IsOptional()
   note?: string;
-} 
+}

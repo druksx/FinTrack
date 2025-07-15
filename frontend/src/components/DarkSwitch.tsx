@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useTheme } from "next-themes"
-import { Moon, Sun } from "lucide-react"
+import { useTheme } from "next-themes";
+import { Moon, Sun } from "lucide-react";
 import { Button } from "./ui/button";
 
 export default function DarkSwitch() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme();
 
   return (
     <Button
@@ -21,5 +21,5 @@ export default function DarkSwitch() {
       )}
       <span className="sr-only">Toggle theme</span>
     </Button>
-  )
+  );
 }

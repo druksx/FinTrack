@@ -52,12 +52,10 @@ export default function ExpenseCharts({ data }: ExpenseChartsProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  // Theme-aware colors
   const textColor = isDark ? "#ffffff" : "#000000";
   const gridColor = isDark ? "#374151" : "#e5e7eb";
   const backgroundColor = isDark ? "#1f2937" : "#ffffff";
 
-  // Process daily expenses data
   const dailyExpensesData = data.charts.dailyExpenses.map((day) => ({
     date: new Date(day.date).toLocaleDateString("en-US", {
       month: "short",
@@ -83,7 +81,9 @@ export default function ExpenseCharts({ data }: ExpenseChartsProps) {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Daily Expenses Line Chart */}
       <div className="rounded-xl border bg-card p-4 shadow-sm md:col-span-2">
-        <h3 className="text-sm font-semibold mb-2 text-foreground">Daily Expenses</h3>
+        <h3 className="text-sm font-semibold mb-2 text-foreground">
+          Daily Expenses
+        </h3>
         <div className="h-[250px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={dailyExpensesData}>
@@ -129,7 +129,9 @@ export default function ExpenseCharts({ data }: ExpenseChartsProps) {
 
       {/* Weekday Averages Bar Chart */}
       <div className="rounded-xl border bg-card p-4 shadow-sm">
-        <h3 className="text-sm font-semibold mb-2 text-foreground">Average by Day</h3>
+        <h3 className="text-sm font-semibold mb-2 text-foreground">
+          Average by Day
+        </h3>
         <div className="h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={weekdayData}>
@@ -172,7 +174,9 @@ export default function ExpenseCharts({ data }: ExpenseChartsProps) {
 
       {/* Category Breakdown Pie Chart */}
       <div className="rounded-xl border bg-card p-4 shadow-sm">
-        <h3 className="text-sm font-semibold mb-2 text-foreground">Top Categories</h3>
+        <h3 className="text-sm font-semibold mb-2 text-foreground">
+          Top Categories
+        </h3>
         <div className="h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -215,4 +219,4 @@ export default function ExpenseCharts({ data }: ExpenseChartsProps) {
       </div>
     </div>
   );
-} 
+}

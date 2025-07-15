@@ -26,10 +26,9 @@ export class CategoriesService {
 
   async deleteOne(id: string, userId: string): Promise<void> {
     try {
-      // First check if the category exists and belongs to the user
       const category = await this.prisma.category.findFirst({
         where: { id, userId },
-        include: { expenses: { take: 1 } }, // Only need to check if any exist
+        include: { expenses: { take: 1 } },
       });
 
       if (!category) {
@@ -42,7 +41,6 @@ export class CategoriesService {
         );
       }
 
-      // If we get here, we can safely delete the category
       await this.prisma.category.delete({
         where: { id },
       });

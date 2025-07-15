@@ -81,7 +81,10 @@ describe('ExpensesController', () => {
       const result = await controller.create(createExpenseDto, 'user-id');
 
       expect(result).toEqual(mockExpense);
-      expect(mockExpensesService.create).toHaveBeenCalledWith(createExpenseDto, 'user-id');
+      expect(mockExpensesService.create).toHaveBeenCalledWith(
+        createExpenseDto,
+        'user-id',
+      );
     });
 
     it('should handle service errors', async () => {
@@ -94,7 +97,9 @@ describe('ExpensesController', () => {
 
       mockExpensesService.create.mockRejectedValue(new Error('Database error'));
 
-      await expect(controller.create(createExpenseDto, 'user-id')).rejects.toThrow('Database error');
+      await expect(
+        controller.create(createExpenseDto, 'user-id'),
+      ).rejects.toThrow('Database error');
     });
   });
 
@@ -106,7 +111,10 @@ describe('ExpensesController', () => {
       const result = await controller.findAll({}, 'user-id');
 
       expect(result).toEqual(expenses);
-      expect(mockExpensesService.findAll).toHaveBeenCalledWith('user-id', undefined);
+      expect(mockExpensesService.findAll).toHaveBeenCalledWith(
+        'user-id',
+        undefined,
+      );
     });
 
     it('should return expenses for a specific month', async () => {
@@ -116,13 +124,20 @@ describe('ExpensesController', () => {
       const result = await controller.findAll({ month: '2024-03' }, 'user-id');
 
       expect(result).toEqual(expenses);
-      expect(mockExpensesService.findAll).toHaveBeenCalledWith('user-id', '2024-03');
+      expect(mockExpensesService.findAll).toHaveBeenCalledWith(
+        'user-id',
+        '2024-03',
+      );
     });
 
     it('should handle service errors', async () => {
-      mockExpensesService.findAll.mockRejectedValue(new Error('Database error'));
+      mockExpensesService.findAll.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(controller.findAll({}, 'user-id')).rejects.toThrow('Database error');
+      await expect(controller.findAll({}, 'user-id')).rejects.toThrow(
+        'Database error',
+      );
     });
   });
 
@@ -143,10 +158,18 @@ describe('ExpensesController', () => {
 
       mockExpensesService.update.mockResolvedValue(updatedExpense);
 
-      const result = await controller.update('expense-id', updateData, 'user-id');
+      const result = await controller.update(
+        'expense-id',
+        updateData,
+        'user-id',
+      );
 
       expect(result).toEqual(updatedExpense);
-      expect(mockExpensesService.update).toHaveBeenCalledWith('expense-id', updateData, 'user-id');
+      expect(mockExpensesService.update).toHaveBeenCalledWith(
+        'expense-id',
+        updateData,
+        'user-id',
+      );
     });
 
     it('should handle service errors', async () => {
@@ -157,9 +180,13 @@ describe('ExpensesController', () => {
         categoryId: 'category-id',
       };
 
-      mockExpensesService.update.mockRejectedValue(new Error('Expense not found'));
+      mockExpensesService.update.mockRejectedValue(
+        new Error('Expense not found'),
+      );
 
-      await expect(controller.update('expense-id', updateData, 'user-id')).rejects.toThrow('Expense not found');
+      await expect(
+        controller.update('expense-id', updateData, 'user-id'),
+      ).rejects.toThrow('Expense not found');
     });
   });
 
@@ -170,13 +197,20 @@ describe('ExpensesController', () => {
       const result = await controller.delete('expense-id', 'user-id');
 
       expect(result).toBeUndefined();
-      expect(mockExpensesService.delete).toHaveBeenCalledWith('expense-id', 'user-id');
+      expect(mockExpensesService.delete).toHaveBeenCalledWith(
+        'expense-id',
+        'user-id',
+      );
     });
 
     it('should handle service errors', async () => {
-      mockExpensesService.delete.mockRejectedValue(new Error('Expense not found'));
+      mockExpensesService.delete.mockRejectedValue(
+        new Error('Expense not found'),
+      );
 
-      await expect(controller.delete('expense-id', 'user-id')).rejects.toThrow('Expense not found');
+      await expect(controller.delete('expense-id', 'user-id')).rejects.toThrow(
+        'Expense not found',
+      );
     });
   });
 
@@ -187,22 +221,35 @@ describe('ExpensesController', () => {
       const result = await controller.getDashboardData({}, 'user-id');
 
       expect(result).toEqual(mockDashboardData);
-      expect(mockExpensesService.getDashboardData).toHaveBeenCalledWith('user-id', undefined);
+      expect(mockExpensesService.getDashboardData).toHaveBeenCalledWith(
+        'user-id',
+        undefined,
+      );
     });
 
     it('should return dashboard data for specific month', async () => {
       mockExpensesService.getDashboardData.mockResolvedValue(mockDashboardData);
 
-      const result = await controller.getDashboardData({ month: '2024-03' }, 'user-id');
+      const result = await controller.getDashboardData(
+        { month: '2024-03' },
+        'user-id',
+      );
 
       expect(result).toEqual(mockDashboardData);
-      expect(mockExpensesService.getDashboardData).toHaveBeenCalledWith('user-id', '2024-03');
+      expect(mockExpensesService.getDashboardData).toHaveBeenCalledWith(
+        'user-id',
+        '2024-03',
+      );
     });
 
     it('should handle service errors', async () => {
-      mockExpensesService.getDashboardData.mockRejectedValue(new Error('Database error'));
+      mockExpensesService.getDashboardData.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(controller.getDashboardData({}, 'user-id')).rejects.toThrow('Database error');
+      await expect(controller.getDashboardData({}, 'user-id')).rejects.toThrow(
+        'Database error',
+      );
     });
   });
 
@@ -211,16 +258,26 @@ describe('ExpensesController', () => {
       const exportData = 'csv,data,here';
       mockExpensesService.getExpensesForExport.mockResolvedValue(exportData);
 
-      const result = await controller.getExpensesForExport('2024-03', 'user-id');
+      const result = await controller.getExpensesForExport(
+        '2024-03',
+        'user-id',
+      );
 
       expect(result).toEqual(exportData);
-      expect(mockExpensesService.getExpensesForExport).toHaveBeenCalledWith('user-id', '2024-03');
+      expect(mockExpensesService.getExpensesForExport).toHaveBeenCalledWith(
+        'user-id',
+        '2024-03',
+      );
     });
 
     it('should handle service errors', async () => {
-      mockExpensesService.getExpensesForExport.mockRejectedValue(new Error('Database error'));
+      mockExpensesService.getExpensesForExport.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(controller.getExpensesForExport('2024-03', 'user-id')).rejects.toThrow('Database error');
+      await expect(
+        controller.getExpensesForExport('2024-03', 'user-id'),
+      ).rejects.toThrow('Database error');
     });
   });
 });

@@ -17,7 +17,6 @@ describe('CategoriesController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     prisma = app.get(PrismaService);
 
-    // Apply the same middleware as in main.ts
     app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
     app.useGlobalFilters(new HttpExceptionFilter());
     app.enableCors({ origin: 'http://localhost:3000' });
@@ -31,7 +30,6 @@ describe('CategoriesController (e2e)', () => {
   });
 
   beforeEach(async () => {
-    // Clean the tables before each test
     await prisma.expense.deleteMany();
     await prisma.category.deleteMany();
   });
@@ -68,11 +66,10 @@ describe('CategoriesController (e2e)', () => {
 
   describe('/categories (GET)', () => {
     it('should return all categories', async () => {
-      // Create test categories
       await prisma.category.createMany({
         data: [
-          { name: 'Food', color: '#FF0000', icon: 'Utensils' },
-          { name: 'Transport', color: '#00FF00', icon: 'Car' },
+          { name: 'Food', color: '#FF0000', icon: 'Utensils', userId: '1' },
+          { name: 'Transport', color: '#00FF00', icon: 'Car', userId: '1' },
         ],
       });
 
@@ -86,8 +83,7 @@ describe('CategoriesController (e2e)', () => {
           expect(res.body[0]).toHaveProperty('name');
           expect(res.body[0]).toHaveProperty('color');
           expect(res.body[0]).toHaveProperty('icon');
-          // Verify the actual categories
-          const names = res.body.map(c => c.name).sort();
+          const names = res.body.map((c) => c.name).sort();
           expect(names).toContain('Food');
           expect(names).toContain('Transport');
         });

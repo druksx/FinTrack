@@ -31,7 +31,10 @@ export class UsersService {
     };
   }
 
-  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto): Promise<UserDto> {
+  async updateProfile(
+    userId: string,
+    updateProfileDto: UpdateProfileDto,
+  ): Promise<UserDto> {
     const user = await this.prisma.user.update({
       where: { id: userId },
       data: {
@@ -55,8 +58,10 @@ export class UsersService {
     };
   }
 
-  async changePassword(userId: string, changePasswordDto: ChangePasswordDto): Promise<void> {
-    // First, get the current user to verify the current password
+  async changePassword(
+    userId: string,
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<void> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -73,20 +78,20 @@ export class UsersService {
       throw new Error('User has no password set (OAuth user)');
     }
 
-    // Verify current password
     const isCurrentPasswordValid = await bcrypt.compare(
       changePasswordDto.currentPassword,
-      user.password
+      user.password,
     );
 
     if (!isCurrentPasswordValid) {
       throw new Error('Invalid current password');
     }
 
-    // Hash new password
-    const hashedNewPassword = await bcrypt.hash(changePasswordDto.newPassword, 12);
+    const hashedNewPassword = await bcrypt.hash(
+      changePasswordDto.newPassword,
+      12,
+    );
 
-    // Update password
     await this.prisma.user.update({
       where: { id: userId },
       data: {
@@ -94,4 +99,4 @@ export class UsersService {
       },
     });
   }
-} 
+}

@@ -15,18 +15,14 @@ export class SubscriptionsService {
     const now = new Date();
 
     if (recurrence === 'ANNUALLY') {
-      // For annual subscriptions, use the start date as the base
       const nextPayment = new Date(startDate);
 
-      // If the start date is in the past, calculate the next annual occurrence
       if (nextPayment < now) {
-        // Find the next year where this date would occur
         const startYear = startDate.getFullYear();
         const currentYear = now.getFullYear();
         const yearsToAdd = currentYear - startYear + 1;
         nextPayment.setFullYear(startYear + yearsToAdd);
 
-        // If it's still in the past (could happen if we're past the annual date this year)
         if (nextPayment < now) {
           nextPayment.setFullYear(nextPayment.getFullYear() + 1);
         }
@@ -34,7 +30,6 @@ export class SubscriptionsService {
 
       return nextPayment;
     } else {
-      // For monthly subscriptions, use the existing logic
       const dayOfMonth = startDate.getDate();
       const nextPayment = new Date(
         now.getFullYear(),
@@ -65,12 +60,10 @@ export class SubscriptionsService {
     createSubscriptionDto: CreateSubscriptionDto,
     userId: string,
   ): Promise<SubscriptionDto> {
-    // Convert date string to ISO format
     const startDate = new Date(
       `${createSubscriptionDto.startDate}T00:00:00.000Z`,
     );
 
-    // Calculate next payment using the start date
     const nextPayment = this.calculateNextPayment(
       startDate,
       createSubscriptionDto.recurrence,
@@ -121,18 +114,16 @@ export class SubscriptionsService {
       where: {
         userId,
         OR: [
-          // Monthly subscriptions
           {
             recurrence: 'MONTHLY',
             startDate: {
-              lte: endDate, // Started before or during this month
+              lte: endDate,
             },
           },
-          // Annual subscriptions
           {
             recurrence: 'ANNUALLY',
             startDate: {
-              lte: endDate, // Started before or during this month
+              lte: endDate,
             },
           },
         ],
@@ -145,13 +136,11 @@ export class SubscriptionsService {
       },
     });
 
-    // Post-process to ensure correct next payment dates and filter subscriptions
     const processedSubscriptions = subscriptions
       .map((sub) => {
         const subStartDate = new Date(sub.startDate);
         const subDayOfMonth = subStartDate.getDate();
 
-        // Skip if the day doesn't exist in this month
         if (subDayOfMonth > endDate.getDate()) {
           return null;
         }
@@ -160,13 +149,10 @@ export class SubscriptionsService {
           const subStartYear = subStartDate.getFullYear();
           const yearsToAdd = year - subStartYear;
 
-          // Only include if it's the start year or a future year
           if (yearsToAdd >= 0) {
-            // Calculate the actual payment date for this year
             const paymentDate = new Date(subStartDate);
             paymentDate.setFullYear(year);
 
-            // Only include if the payment date falls in our target month
             if (paymentDate.getMonth() === month - 1) {
               return {
                 ...sub,
@@ -176,7 +162,6 @@ export class SubscriptionsService {
           }
           return null;
         } else {
-          // For monthly subscriptions
           const paymentDate = new Date(year, month - 1, subDayOfMonth);
           return {
             ...sub,
@@ -184,7 +169,7 @@ export class SubscriptionsService {
           };
         }
       })
-      .filter(Boolean); // Remove null entries
+      .filter(Boolean);
 
     return processedSubscriptions.map(this.mapToSubscriptionDto);
   }

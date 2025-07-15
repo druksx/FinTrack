@@ -2,7 +2,13 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useMonth } from "@/lib/MonthContext";
-import { BadgeQuestionMark, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  BadgeQuestionMark,
+  Pencil,
+  Trash2,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import Image from "next/image";
 import { apiClient, API_ENDPOINTS } from "@/lib/api";
 import { useUser } from "@/lib/UserContext";
@@ -43,7 +49,6 @@ export default function SubscriptionCalendar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { toast } = useToast();
 
-  // Function to generate calendar days
   const generateCalendar = (
     year: number,
     month: number,
@@ -52,7 +57,6 @@ export default function SubscriptionCalendar() {
     const lastDay = new Date(year, month, 0);
     const daysInMonth = lastDay.getDate();
 
-    // Only current month days
     return Array.from({ length: daysInMonth }, (_, i) => ({
       date: i + 1,
       subscriptions: subscriptions.filter((sub) => {
@@ -92,7 +96,6 @@ export default function SubscriptionCalendar() {
   }, [user, monthString]);
 
   useEffect(() => {
-    // Only fetch subscriptions when user context has finished loading
     if (!userLoading) {
       fetchSubscriptions();
     }
@@ -112,7 +115,7 @@ export default function SubscriptionCalendar() {
       }
 
       setSelectedSubscription(null);
-      refreshAll(); // Refresh all components that display subscription data
+      refreshAll();
 
       toast({
         title: "Success",
@@ -136,10 +139,8 @@ export default function SubscriptionCalendar() {
   const handleSubscriptionUpdated = async () => {
     setIsEditDialogOpen(false);
     setSelectedSubscription(null);
-    // No need to call fetchSubscriptions here since AddSubscriptionDialog already calls refreshAll()
   };
 
-  // Show loading while user context is loading OR while fetching subscriptions
   if (userLoading || isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -158,16 +159,19 @@ export default function SubscriptionCalendar() {
   }
 
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const firstDayOfMonth = new Date(monthString + "-01").getDay(); // 0 = Sunday
+  const firstDayOfMonth = new Date(monthString + "-01").getDay();
 
   return (
     <div className="space-y-4 transition-opacity duration-300">
-      {/* Calendar Header with Collapse Button */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
           {subscriptions.length > 0 && (
             <>
-              ${subscriptions.reduce((total, sub) => total + Number(sub.amount), 0).toFixed(2)} this month
+              $
+              {subscriptions
+                .reduce((total, sub) => total + Number(sub.amount), 0)
+                .toFixed(2)}{" "}
+              this month
             </>
           )}
         </div>
@@ -191,88 +195,82 @@ export default function SubscriptionCalendar() {
         </Button>
       </div>
 
-      {/* Calendar Grid */}
       {!isCollapsed && (
         <div className="rounded-lg border bg-card overflow-hidden">
-        {/* Week day headers */}
-        <div className="grid grid-cols-7 gap-px border-b bg-muted">
-          {weekDays.map((day) => (
-            <div
-              key={day}
-              className="bg-background p-1.5 text-center text-xs font-medium text-muted-foreground"
-            >
-              {day}
-            </div>
-          ))}
-        </div>
-
-        {/* Calendar days */}
-        <div className="grid grid-cols-7 gap-px bg-muted">
-          {/* Empty cells for days before the first of the month */}
-          {Array.from({ length: firstDayOfMonth }).map((_, index) => (
-            <div
-              key={`empty-start-${index}`}
-              className="bg-background p-1 min-h-[50px]"
-            />
-          ))}
-
-          {/* Current month days */}
-          {calendar.map((day, index) => (
-            <div
-              key={index}
-              className="min-h-[50px] bg-background p-1 relative"
-            >
-              <div className="font-medium text-xs mb-1 text-muted-foreground">
-                {day.date}
+          <div className="grid grid-cols-7 gap-px border-b bg-muted">
+            {weekDays.map((day) => (
+              <div
+                key={day}
+                className="bg-background p-1.5 text-center text-xs font-medium text-muted-foreground"
+              >
+                {day}
               </div>
-              <div className="flex flex-wrap gap-0.5">
-                {day.subscriptions.map((subscription) => (
-                  <Tooltip key={subscription.id}>
-                    <TooltipTrigger asChild>
-                      <div
-                        role="button"
-                        tabIndex={0}
-                        className="w-5 h-5 rounded-sm flex items-center justify-center cursor-pointer transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary"
-                        style={{
-                          backgroundColor: subscription.category.color,
-                        }}
-                        onClick={() => setSelectedSubscription(subscription)}
-                      >
-                        {subscription.logoUrl ? (
-                          <Image
-                            src={subscription.logoUrl}
-                            alt={subscription.name}
-                            width={12}
-                            height={12}
-                            className="rounded-sm"
-                          />
-                        ) : (
-                          <BadgeQuestionMark className="w-2.5 h-2.5 text-white" />
-                        )}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" align="center">
-                      <div className="space-y-1">
-                        <div className="font-medium">{subscription.name}</div>
-                        <div className="text-xs opacity-90">
-                          ${Number(subscription.amount).toFixed(2)} •{" "}
-                          {subscription.recurrence.toLowerCase()}
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7 gap-px bg-muted">
+            {Array.from({ length: firstDayOfMonth }).map((_, index) => (
+              <div
+                key={`empty-start-${index}`}
+                className="bg-background p-1 min-h-[50px]"
+              />
+            ))}
+
+            {calendar.map((day, index) => (
+              <div
+                key={index}
+                className="min-h-[50px] bg-background p-1 relative"
+              >
+                <div className="font-medium text-xs mb-1 text-muted-foreground">
+                  {day.date}
+                </div>
+                <div className="flex flex-wrap gap-0.5">
+                  {day.subscriptions.map((subscription) => (
+                    <Tooltip key={subscription.id}>
+                      <TooltipTrigger asChild>
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          className="w-5 h-5 rounded-sm flex items-center justify-center cursor-pointer transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary"
+                          style={{
+                            backgroundColor: subscription.category.color,
+                          }}
+                          onClick={() => setSelectedSubscription(subscription)}
+                        >
+                          {subscription.logoUrl ? (
+                            <Image
+                              src={subscription.logoUrl}
+                              alt={subscription.name}
+                              width={12}
+                              height={12}
+                              className="rounded-sm"
+                            />
+                          ) : (
+                            <BadgeQuestionMark className="w-2.5 h-2.5 text-white" />
+                          )}
                         </div>
-                        <div className="text-xs opacity-90">
-                          {subscription.category.name}
+                      </TooltipTrigger>
+                      <TooltipContent side="top" align="center">
+                        <div className="space-y-1">
+                          <div className="font-medium">{subscription.name}</div>
+                          <div className="text-xs opacity-90">
+                            ${Number(subscription.amount).toFixed(2)} •{" "}
+                            {subscription.recurrence.toLowerCase()}
+                          </div>
+                          <div className="text-xs opacity-90">
+                            {subscription.category.name}
+                          </div>
                         </div>
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                ))}
+                      </TooltipContent>
+                    </Tooltip>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
       )}
 
-      {/* Subscription Details Dialog */}
       <Dialog
         open={selectedSubscription !== null}
         onOpenChange={(open) => !open && setSelectedSubscription(null)}
@@ -367,7 +365,6 @@ export default function SubscriptionCalendar() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Subscription Dialog */}
       <AddSubscriptionDialog
         isOpen={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
