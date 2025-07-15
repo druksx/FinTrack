@@ -1,7 +1,15 @@
 #!/bin/bash
-
-echo "🚀 Starting FinTrack in Production Mode..."
-echo "📝 Features: Optimized builds, multi-stage Docker, production performance"
+echo "🏭 Starting FinTrack in Production Mode..."
+echo "Features: Optimized builds, multi-stage Docker, standalone output"
+echo ""
+echo "Building containers... (this may take a few minutes)"
+echo ""
+echo "Access the application at:"
+echo "- Frontend: http://localhost:3000"
+echo "- Backend API: http://localhost:3333"
+echo "- API Documentation: http://localhost:3333/api"
+echo ""
+echo "Press Ctrl+C to stop all services"
 echo ""
 
 # Stop any existing containers

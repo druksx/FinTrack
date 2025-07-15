@@ -31,6 +31,7 @@ export default function AddSubscriptionDialog({
   editSubscription,
 }: AddSubscriptionDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const { user } = useUser();
   const { toast } = useToast();
   const { refreshAll } = useRefresh();
@@ -89,10 +90,6 @@ export default function AddSubscriptionDialog({
       }
 
       refreshAll(); // Refresh all components that display subscription data
-
-      if (onOpenChange) {
-        onOpenChange(false);
-      }
     } catch (error) {
       console.error("Error submitting subscription:", error);
       toast({
@@ -107,6 +104,13 @@ export default function AddSubscriptionDialog({
       });
     } finally {
       setIsSubmitting(false);
+      // Close the dialog regardless of success or error
+      if (onOpenChange) {
+        onOpenChange(false);
+      } else {
+        // For uncontrolled mode, use internal state
+        setInternalOpen(false);
+      }
     }
   };
 
@@ -130,7 +134,7 @@ export default function AddSubscriptionDialog({
       {content}
     </Dialog>
   ) : (
-    <Dialog>
+    <Dialog open={internalOpen} onOpenChange={setInternalOpen}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />

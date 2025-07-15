@@ -51,7 +51,7 @@ describe('CategoriesService', () => {
       name: 'Test',
       color: '#000000',
       icon: 'Star',
-    });
+    }, 'test-user-id');
     expect(category).toHaveProperty('id');
     expect(category.name).toBe('Test');
     expect(category.color).toBe('#000000');
@@ -59,7 +59,7 @@ describe('CategoriesService', () => {
   });
 
   it('should find all categories', async () => {
-    const categories = await service.findAll();
+    const categories = await service.findAll('test-user-id');
     expect(categories).toHaveLength(1);
     expect(categories[0]).toHaveProperty('icon');
   });

@@ -71,7 +71,6 @@ export class ExpensesService {
     const startDate = new Date(year, monthNum - 1, 1);
     const endDate = new Date(year, monthNum, 0);
 
-    // Get all expenses for the month
     const expenses = await this.prisma.expense.findMany({
       where: {
         date: {
@@ -87,26 +86,22 @@ export class ExpensesService {
       },
     });
 
-    // Map regular expenses to DTOs
     const expenseDtos = expenses.map(this.mapToExpenseDto);
 
-    // Get all subscriptions that are due this month
     const subscriptions = await this.prisma.subscription.findMany({
       where: {
         userId: userId,
         OR: [
-          // Monthly subscriptions
           {
             recurrence: 'MONTHLY',
             startDate: {
-              lte: endDate, // Started before or during this month
+              lte: endDate,
             },
           },
-          // Annual subscriptions
           {
             recurrence: 'ANNUALLY',
             startDate: {
-              lte: endDate, // Started before or during this month
+              lte: endDate,
             },
           },
         ],
@@ -116,13 +111,11 @@ export class ExpensesService {
       },
     });
 
-    // Process subscriptions to get the correct payment dates for this month
     const processedSubscriptions = subscriptions
       .map((sub) => {
         const subStartDate = new Date(sub.startDate);
         const subDayOfMonth = subStartDate.getDate();
 
-        // Skip if the day doesn't exist in this month
         if (subDayOfMonth > endDate.getDate()) {
           return null;
         }
@@ -131,13 +124,10 @@ export class ExpensesService {
           const subStartYear = subStartDate.getFullYear();
           const yearsToAdd = year - subStartYear;
 
-          // Only include if it's the start year or a future year
           if (yearsToAdd >= 0) {
-            // Calculate the actual payment date for this year
             const paymentDate = new Date(subStartDate);
             paymentDate.setFullYear(year);
 
-            // Only include if the payment date falls in our target month
             if (paymentDate.getMonth() === monthNum - 1) {
               return {
                 ...sub,
@@ -147,7 +137,6 @@ export class ExpensesService {
           }
           return null;
         } else {
-          // For monthly subscriptions
           const paymentDate = new Date(year, monthNum - 1, subDayOfMonth);
           return {
             ...sub,
@@ -155,9 +144,8 @@ export class ExpensesService {
           };
         }
       })
-      .filter(Boolean); // Remove null entries
+      .filter(Boolean);
 
-    // Convert subscriptions to expense DTOs
     const subscriptionExpenses = processedSubscriptions
       .filter(
         (subscription): subscription is NonNullable<typeof subscription> =>
@@ -193,7 +181,6 @@ export class ExpensesService {
         };
       }) as ExpenseDto[];
 
-    // Combine and sort all expenses
     const allExpenses = [...expenseDtos, ...subscriptionExpenses].sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
     );
@@ -205,7 +192,6 @@ export class ExpensesService {
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year, 11, 31);
 
-    // Get all expenses for the year
     const expenses = await this.prisma.expense.findMany({
       where: {
         userId: userId,
@@ -222,26 +208,22 @@ export class ExpensesService {
       },
     });
 
-    // Map regular expenses to DTOs
     const expenseDtos = expenses.map(this.mapToExpenseDto);
 
-    // Get all subscriptions that are due this year
     const subscriptions = await this.prisma.subscription.findMany({
       where: {
         userId: userId,
         OR: [
-          // Monthly subscriptions
           {
             recurrence: 'MONTHLY',
             startDate: {
-              lte: endDate, // Started before or during this year
+              lte: endDate,
             },
           },
-          // Annual subscriptions
           {
             recurrence: 'ANNUALLY',
             startDate: {
-              lte: endDate, // Started before or during this year
+              lte: endDate,
             },
           },
         ],
@@ -251,15 +233,12 @@ export class ExpensesService {
       },
     });
 
-    // Process subscriptions to get all payment dates for this year
     const subscriptionExpenses = subscriptions.flatMap((subscription) => {
       const subscriptionDate = new Date(subscription.startDate);
       const paymentDay = subscriptionDate.getDate();
 
       if (subscription.recurrence === 'MONTHLY') {
-        // For monthly subscriptions, create an expense for each month
         return Array.from({ length: 12 }, (_, monthIndex) => {
-          // Skip if the payment day doesn't exist in this month
           const lastDayOfMonth = new Date(year, monthIndex + 1, 0).getDate();
           if (paymentDay > lastDayOfMonth) {
             return null;
@@ -292,13 +271,11 @@ export class ExpensesService {
           } as ExpenseDto;
         }).filter((expense): expense is ExpenseDto => expense !== null);
       } else {
-        // For annual subscriptions
         const subscriptionYear = subscriptionDate.getFullYear();
         if (year < subscriptionYear) {
           return [];
         }
 
-        // Create a single expense for the year
         return [
           {
             id: `subscription_${subscription.id}_${year}`,
@@ -329,7 +306,6 @@ export class ExpensesService {
       }
     });
 
-    // Combine and sort all expenses
     const allExpenses = [...expenseDtos, ...subscriptionExpenses].sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
     );
@@ -390,34 +366,27 @@ export class ExpensesService {
       ? month.split('-').map(Number)
       : [new Date().getFullYear(), new Date().getMonth() + 1];
 
-    // Calculate date ranges
     const currentMonthStart = new Date(year, monthNum - 1, 1);
     const currentMonthEnd = new Date(year, monthNum, 0);
     const previousMonthStart = new Date(year, monthNum - 2, 1);
     const previousMonthEnd = new Date(year, monthNum - 1, 0);
 
-    // Get current month subscriptions
     const allSubscriptions = await this.prisma.subscription.findMany({
       where: {
         userId: userId,
       },
     });
 
-    // Filter subscriptions that are due this month
     const currentMonthSubscriptions = allSubscriptions.filter((sub) => {
       if (sub.recurrence === 'MONTHLY') {
-        // Monthly subscriptions: include if started before or during this month
         return sub.startDate <= currentMonthEnd;
       } else {
-        // Annual subscriptions: calculate if they're due this month
         const subStartDate = new Date(sub.startDate);
         const subStartYear = subStartDate.getFullYear();
         const subStartMonth = subStartDate.getMonth();
         const subStartDay = subStartDate.getDate();
 
-        // Check if this subscription would be due in the current month/year
         if (subStartMonth === monthNum - 1 && subStartYear <= year) {
-          // Skip if the day doesn't exist in this month
           if (subStartDay <= currentMonthEnd.getDate()) {
             return true;
           }
@@ -426,13 +395,10 @@ export class ExpensesService {
       }
     });
 
-    // Filter subscriptions that were due previous month
     const previousMonthSubscriptions = allSubscriptions.filter((sub) => {
       if (sub.recurrence === 'MONTHLY') {
-        // Monthly subscriptions: include if started before or during previous month
         return sub.startDate <= previousMonthEnd;
       } else {
-        // Annual subscriptions: calculate if they were due previous month
         const subStartDate = new Date(sub.startDate);
         const subStartYear = subStartDate.getFullYear();
         const subStartMonth = subStartDate.getMonth();
@@ -441,9 +407,7 @@ export class ExpensesService {
         const prevYear = monthNum === 1 ? year - 1 : year;
         const prevMonth = monthNum === 1 ? 12 : monthNum - 1;
 
-        // Check if this subscription would be due in the previous month/year
         if (subStartMonth === prevMonth - 1 && subStartYear <= prevYear) {
-          // Skip if the day doesn't exist in previous month
           if (subStartDay <= previousMonthEnd.getDate()) {
             return true;
           }
@@ -452,7 +416,6 @@ export class ExpensesService {
       }
     });
 
-    // Calculate subscription totals
     const currentMonthSubscriptionTotal = currentMonthSubscriptions.reduce(
       (sum, sub) => sum.add(sub.amount),
       new Prisma.Decimal(0),
@@ -463,7 +426,6 @@ export class ExpensesService {
       new Prisma.Decimal(0),
     );
 
-    // Get current month manual expenses total
     const currentMonthExpenses = await this.prisma.expense.aggregate({
       where: {
         userId: userId,
@@ -477,7 +439,6 @@ export class ExpensesService {
       },
     });
 
-    // Get previous month manual expenses total
     const previousMonthExpenses = await this.prisma.expense.aggregate({
       where: {
         userId: userId,
@@ -491,7 +452,6 @@ export class ExpensesService {
       },
     });
 
-    // Combine manual expenses and subscription totals
     const currentTotal = (
       currentMonthExpenses._sum.amount || new Prisma.Decimal(0)
     ).add(currentMonthSubscriptionTotal);
@@ -499,7 +459,6 @@ export class ExpensesService {
       previousMonthExpenses._sum.amount || new Prisma.Decimal(0)
     ).add(previousMonthSubscriptionTotal);
 
-    // Get category totals for current month (including subscriptions)
     const manualExpenseCategoryTotals = await this.prisma.expense.groupBy({
       by: ['categoryId'],
       where: {
@@ -514,7 +473,6 @@ export class ExpensesService {
       },
     });
 
-    // Group subscription amounts by category
     const subscriptionCategoryTotals = new Map<string, Prisma.Decimal>();
     for (const sub of currentMonthSubscriptions) {
       const current =
@@ -522,7 +480,6 @@ export class ExpensesService {
       subscriptionCategoryTotals.set(sub.categoryId, current.add(sub.amount));
     }
 
-    // Combine manual and subscription category totals
     const combinedCategoryTotals = [...manualExpenseCategoryTotals];
     for (const [categoryId, amount] of subscriptionCategoryTotals.entries()) {
       const existingIndex = combinedCategoryTotals.findIndex(
@@ -539,7 +496,6 @@ export class ExpensesService {
       }
     }
 
-    // Get category details
     const categories = await this.prisma.category.findMany({
       where: {
         id: {
@@ -548,7 +504,6 @@ export class ExpensesService {
       },
     });
 
-    // Calculate total expenses and category percentages
     const totalExpenses = currentTotal;
     const topCategories: CategoryTotalDto[] = combinedCategoryTotals
       .map((ct) => {
@@ -566,9 +521,8 @@ export class ExpensesService {
       })
       .filter((ct): ct is CategoryTotalDto => ct !== null)
       .sort((a, b) => Number(b.total) - Number(a.total))
-      .slice(0, 5); // Get top 5 categories
+      .slice(0, 5);
 
-    // Calculate month-over-month comparison
     const percentageChange = previousTotal.equals(0)
       ? 0
       : Number(
@@ -579,7 +533,6 @@ export class ExpensesService {
             .toFixed(1),
         );
 
-    // Get daily expenses
     const dailyExpenses = await this.prisma.expense.groupBy({
       by: ['date'],
       where: {
@@ -594,7 +547,6 @@ export class ExpensesService {
       },
     });
 
-    // Get weekday averages
     const weekdayExpenses = await this.prisma.expense.groupBy({
       by: ['date'],
       where: {
@@ -609,13 +561,11 @@ export class ExpensesService {
       },
     });
 
-    // Process daily expenses
     const dailyExpensesData = dailyExpenses.map((day) => ({
       date: day.date.toISOString().split('T')[0],
       total: day._sum.amount?.toString() || '0',
     }));
 
-    // Calculate weekday averages
     const weekdayTotals = new Map<
       number,
       { total: Prisma.Decimal; count: number }
@@ -673,7 +623,6 @@ export class ExpensesService {
     const startDate = new Date(year, monthNum - 1, 1);
     const endDate = new Date(year, monthNum, 0);
 
-    // Get manual expenses
     const expenses = await this.prisma.expense.findMany({
       where: {
         userId: userId,
@@ -690,19 +639,16 @@ export class ExpensesService {
       },
     });
 
-    // Get subscriptions for the month
     const subscriptions = await this.prisma.subscription.findMany({
       where: {
         userId: userId,
         OR: [
-          // Monthly subscriptions
           {
             recurrence: 'MONTHLY',
             startDate: {
               lte: endDate,
             },
           },
-          // Annual subscriptions due this month
           {
             recurrence: 'ANNUALLY',
             nextPayment: {
@@ -717,7 +663,6 @@ export class ExpensesService {
       },
     });
 
-    // Convert expenses to export format
     const expenseRows = expenses.map((expense) => ({
       date: expense.date.toISOString().split('T')[0],
       amount: Number(expense.amount).toFixed(2),
@@ -726,7 +671,6 @@ export class ExpensesService {
       type: 'Manual Expense',
     }));
 
-    // Convert subscriptions to export format
     const subscriptionRows = subscriptions.map((subscription) => ({
       date: new Date(year, monthNum - 1, subscription.startDate.getDate())
         .toISOString()
@@ -737,7 +681,6 @@ export class ExpensesService {
       type: 'Subscription',
     }));
 
-    // Combine and sort all entries by date
     return [...expenseRows, ...subscriptionRows].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     );

@@ -17,10 +17,13 @@ describe('ExpensesService', () => {
     note: 'Test expense',
     categoryId: 'cat1',
     userId: TEST_USER_ID,
+    createdAt: new Date('2024-03-15T10:30:00Z'),
+    updatedAt: new Date('2024-03-15T10:30:00Z'),
     category: {
       id: 'cat1',
       name: 'Food',
-      icon: '🍕',
+      color: '#FF5733',
+      icon: 'UtensilsCrossed',
     },
   };
 
@@ -79,12 +82,17 @@ describe('ExpensesService', () => {
 
       expect(result).toEqual({
         id: '1',
-        amount: 100,
-        date: '2024-03-15T00:00:00.000Z',
+        amount: '100',
+        date: '2024-03-15',
         note: 'Test expense',
         categoryId: 'cat1',
-        categoryName: 'Food',
-        categoryIcon: '🍕',
+        category: {
+          id: 'cat1',
+          name: 'Food',
+          color: '#FF5733',
+          icon: 'UtensilsCrossed',
+        },
+        createdAt: '2024-03-15T10:30:00.000Z',
       });
     });
   });
