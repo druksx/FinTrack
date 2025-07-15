@@ -15,6 +15,7 @@ import { CATEGORY_ICONS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient, API_ENDPOINTS } from "@/lib/api";
 import { useUser } from "@/lib/UserContext";
+import { useRefresh } from "@/lib/RefreshContext";
 
 interface CategoryDialogProps {
   isOpen: boolean;
@@ -53,6 +54,7 @@ export default function CategoryDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useUser();
   const { toast } = useToast();
+  const { refreshAll } = useRefresh();
 
   useEffect(() => {
     if (editCategory) {

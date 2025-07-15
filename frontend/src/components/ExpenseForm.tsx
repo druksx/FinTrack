@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,6 +27,8 @@ import { CATEGORY_ICONS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient, API_ENDPOINTS } from "@/lib/api";
 import { useUser } from "@/lib/UserContext";
+import { useRefresh } from "@/lib/RefreshContext";
+import { useMonth } from "@/lib/MonthContext";
 
 interface Category {
   id: string;
@@ -71,18 +73,36 @@ export default function ExpenseForm({
   );
   const { user, isLoading: userLoading } = useUser();
   const { toast } = useToast();
+  const { refreshAll } = useRefresh();
+  const { monthString } = useMonth();
+
+  // Smart date defaulting: today's date if viewing current month, otherwise 1st of selected month
+  const getDefaultDate = () => {
+    const today = new Date();
+    const currentMonthString = `${today.getFullYear()}-${String(
+      today.getMonth() + 1
+    ).padStart(2, "0")}`;
+
+    if (monthString === currentMonthString) {
+      // We're viewing the current month, default to today's date
+      return today.toISOString().split("T")[0];
+    } else {
+      // We're viewing a different month, default to 1st of that month
+      return `${monthString}-01`;
+    }
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues || {
       amount: "",
-      date: new Date().toISOString().split("T")[0],
+      date: getDefaultDate(),
       categoryId: "",
       note: "",
     },
   });
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -95,7 +115,7 @@ export default function ExpenseForm({
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
-  };
+  }, [user]);
 
   const handleDeleteCategory = async (id: string, name: string) => {
     if (!user) return;
@@ -124,6 +144,7 @@ export default function ExpenseForm({
       if (form.getValues("categoryId") === id) {
         form.setValue("categoryId", "");
       }
+      refreshAll(); // Refresh all components that display category data
       toast({
         title: "Category deleted",
         description: `Category "${name}" has been deleted successfully.`,
@@ -148,7 +169,7 @@ export default function ExpenseForm({
     if (!userLoading && user) {
       fetchCategories();
     }
-  }, [user, userLoading]);
+  }, [userLoading, fetchCategories]);
 
   return (
     <>

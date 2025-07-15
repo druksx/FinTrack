@@ -14,6 +14,7 @@ import ExpenseForm from "./ExpenseForm";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient, API_ENDPOINTS } from "@/lib/api";
 import { useUser } from "@/lib/UserContext";
+import { useRefresh } from "@/lib/RefreshContext";
 
 interface Expense {
   id: string;
@@ -39,6 +40,7 @@ export default function AddExpenseDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useUser();
   const { toast } = useToast();
+  const { refreshAll } = useRefresh();
 
   const handleSubmit = async (values: any) => {
     if (!user) {
@@ -70,7 +72,7 @@ export default function AddExpenseDialog({
       }
 
       onOpenChange(false);
-      onExpenseAdded();
+      refreshAll(); // Refresh all components that display expense data
       toast({
         title: editExpense ? "Expense updated" : "Expense added",
         description: editExpense

@@ -11,3 +11,15 @@ README.md
 coverage
 **/*.test.ts
 **/*.test.tsx
+Dockerfile
+docker-compose.yml
+*.md
+.eslintrc.json
+.eslintrc.js
+.eslintrc.cjs
+.prettier*
+.nyc_output
+.DS_Store
+*.log
+*.tgz
+*.tar.gz

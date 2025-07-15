@@ -7,6 +7,7 @@ import { MonthProvider } from "@/lib/MonthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UserProvider } from "@/lib/UserContext";
+import { RefreshProvider } from "@/lib/RefreshContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -45,8 +46,10 @@ export default function RootLayout({
           >
             <TooltipProvider delayDuration={0}>
               <MonthProvider>
-                <LayoutContent>{children}</LayoutContent>
-                <Toaster />
+                <RefreshProvider>
+                  <LayoutContent>{children}</LayoutContent>
+                  <Toaster />
+                </RefreshProvider>
               </MonthProvider>
             </TooltipProvider>
           </ThemeProvider>

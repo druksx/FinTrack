@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import DarkSwitch from "@/components/DarkSwitch";
 import ExpenseList from "@/components/ExpenseList";
 import DashboardCards from "@/components/DashboardCards";
 import ExportExpenses from "@/components/ExportExpenses";

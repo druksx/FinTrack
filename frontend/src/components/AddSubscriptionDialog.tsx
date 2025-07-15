@@ -15,6 +15,7 @@ import SubscriptionForm from "./SubscriptionForm";
 import { apiClient, API_ENDPOINTS } from "@/lib/api";
 import { Subscription } from "@/lib/types";
 import { useUser } from "@/lib/UserContext";
+import { useRefresh } from "@/lib/RefreshContext";
 
 interface AddSubscriptionDialogProps {
   onSubscriptionAdded?: () => void;
@@ -32,6 +33,7 @@ export default function AddSubscriptionDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useUser();
   const { toast } = useToast();
+  const { refreshAll } = useRefresh();
 
   const handleSubmit = async (data: any) => {
     if (!user) {
@@ -85,6 +87,8 @@ export default function AddSubscriptionDialog({
       if (onSubscriptionAdded) {
         onSubscriptionAdded();
       }
+
+      refreshAll(); // Refresh all components that display subscription data
 
       if (onOpenChange) {
         onOpenChange(false);

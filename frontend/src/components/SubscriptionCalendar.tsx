@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useMonth } from "@/lib/MonthContext";
 import { BadgeQuestionMark, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import Image from "next/image";
 import { apiClient, API_ENDPOINTS } from "@/lib/api";
 import { useUser } from "@/lib/UserContext";
+import { useRefresh } from "@/lib/RefreshContext";
 import {
   Tooltip,
   TooltipContent,
@@ -31,6 +32,7 @@ interface CalendarDay {
 export default function SubscriptionCalendar() {
   const { monthString } = useMonth();
   const { user, isLoading: userLoading } = useUser();
+  const { subscriptionsRefreshKey, refreshAll } = useRefresh();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [calendar, setCalendar] = useState<CalendarDay[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,7 +62,7 @@ export default function SubscriptionCalendar() {
     }));
   };
 
-  const fetchSubscriptions = async () => {
+  const fetchSubscriptions = useCallback(async () => {
     if (!user) {
       setIsLoading(false);
       return;
@@ -87,14 +89,14 @@ export default function SubscriptionCalendar() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, monthString]);
 
   useEffect(() => {
     // Only fetch subscriptions when user context has finished loading
     if (!userLoading) {
       fetchSubscriptions();
     }
-  }, [monthString, user, userLoading]);
+  }, [userLoading, subscriptionsRefreshKey, fetchSubscriptions]);
 
   const handleDeleteSubscription = async (id: string) => {
     if (!user) return;
@@ -110,7 +112,7 @@ export default function SubscriptionCalendar() {
       }
 
       setSelectedSubscription(null);
-      await fetchSubscriptions();
+      refreshAll(); // Refresh all components that display subscription data
 
       toast({
         title: "Success",
@@ -134,7 +136,7 @@ export default function SubscriptionCalendar() {
   const handleSubscriptionUpdated = async () => {
     setIsEditDialogOpen(false);
     setSelectedSubscription(null);
-    await fetchSubscriptions();
+    // No need to call fetchSubscriptions here since AddSubscriptionDialog already calls refreshAll()
   };
 
   // Show loading while user context is loading OR while fetching subscriptions
@@ -159,7 +161,7 @@ export default function SubscriptionCalendar() {
   const firstDayOfMonth = new Date(monthString + "-01").getDay(); // 0 = Sunday
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 transition-opacity duration-300">
       {/* Calendar Header with Collapse Button */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">

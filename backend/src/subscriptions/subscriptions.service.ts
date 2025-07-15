@@ -13,22 +13,41 @@ export class SubscriptionsService {
     recurrence: 'MONTHLY' | 'ANNUALLY',
   ): Date {
     const now = new Date();
-    const dayOfMonth = startDate.getDate();
-    const nextPayment = new Date(now.getFullYear(), now.getMonth(), dayOfMonth);
 
     if (recurrence === 'ANNUALLY') {
-      // If it's annual and this year's date has passed, move to next year
+      // For annual subscriptions, use the start date as the base
+      const nextPayment = new Date(startDate);
+
+      // If the start date is in the past, calculate the next annual occurrence
       if (nextPayment < now) {
-        nextPayment.setFullYear(now.getFullYear() + 1);
+        // Find the next year where this date would occur
+        const startYear = startDate.getFullYear();
+        const currentYear = now.getFullYear();
+        const yearsToAdd = currentYear - startYear + 1;
+        nextPayment.setFullYear(startYear + yearsToAdd);
+
+        // If it's still in the past (could happen if we're past the annual date this year)
+        if (nextPayment < now) {
+          nextPayment.setFullYear(nextPayment.getFullYear() + 1);
+        }
       }
+
+      return nextPayment;
     } else {
-      // If it's monthly and this month's date has passed, move to next month
+      // For monthly subscriptions, use the existing logic
+      const dayOfMonth = startDate.getDate();
+      const nextPayment = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        dayOfMonth,
+      );
+
       if (nextPayment < now) {
         nextPayment.setMonth(now.getMonth() + 1);
       }
-    }
 
-    return nextPayment;
+      return nextPayment;
+    }
   }
 
   private mapToSubscriptionDto(subscription: any): SubscriptionDto {

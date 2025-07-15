@@ -20,10 +20,17 @@ export class AuthService {
         id: true,
         email: true,
         name: true,
+        image: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
 
-    return user;
+    return {
+      ...user,
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString(),
+    };
   }
 
   async validateUser(email: string, password: string) {
@@ -33,7 +40,10 @@ export class AuthService {
         id: true,
         email: true,
         name: true,
+        image: true,
         password: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
 
@@ -49,13 +59,75 @@ export class AuthService {
 
     // Return user without password
     const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return {
+      ...userWithoutPassword,
+      createdAt: userWithoutPassword.createdAt.toISOString(),
+      updatedAt: userWithoutPassword.updatedAt.toISOString(),
+    };
   }
 
   async findOrCreateOAuthUser(oauthDto: OAuthDto) {
-    // TODO: Implement OAuth user creation after fixing Prisma types
-    // For now, return null to disable OAuth
-    return null;
+    // Check if user exists
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: oauthDto.email },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        image: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (existingUser) {
+      // Update user with latest OAuth data
+      const updatedUser = await this.prisma.user.update({
+        where: { id: existingUser.id },
+        data: {
+          name: oauthDto.name || existingUser.name,
+          image: oauthDto.image || existingUser.image,
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          image: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return {
+        ...updatedUser,
+        createdAt: updatedUser.createdAt.toISOString(),
+        updatedAt: updatedUser.updatedAt.toISOString(),
+      };
+    }
+
+    // Create new user
+    const newUser = await this.prisma.user.create({
+      data: {
+        email: oauthDto.email,
+        name: oauthDto.name || null,
+        image: oauthDto.image || null,
+        password: null, // OAuth users don't have passwords
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        image: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return {
+      ...newUser,
+      createdAt: newUser.createdAt.toISOString(),
+      updatedAt: newUser.updatedAt.toISOString(),
+    };
   }
 }
  

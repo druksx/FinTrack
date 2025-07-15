@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useMonth } from "@/lib/MonthContext";
 import { apiClient, API_ENDPOINTS } from "@/lib/api";
 import { useUser } from "@/lib/UserContext";
+import { useRefresh } from "@/lib/RefreshContext";
 import { ArrowDown, ArrowUp, BadgeQuestionMark, CircleDot } from "lucide-react";
 import { CATEGORY_ICONS } from "@/lib/constants";
 import ExpenseCharts from "./ExpenseCharts";
@@ -48,41 +49,42 @@ interface ChartData {
 export default function DashboardCards() {
   const { monthString } = useMonth();
   const { user, isLoading: userLoading } = useUser();
+  const { dashboardRefreshKey } = useRefresh();
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchDashboardData = useCallback(async () => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await apiClient.get(
+        `${API_ENDPOINTS.EXPENSES}/dashboard?month=${monthString}`,
+        user.id
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch dashboard data");
+      }
+      const data = await response.json();
+      setData(data);
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+      setError(error instanceof Error ? error.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, monthString]);
+
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        const response = await apiClient.get(
-          `${API_ENDPOINTS.EXPENSES}/dashboard?month=${monthString}`,
-          user.id
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch dashboard data");
-        }
-        const data = await response.json();
-        setData(data);
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-        setError(error instanceof Error ? error.message : "An error occurred");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     // Only fetch dashboard data when user context has finished loading
     if (!userLoading) {
       fetchDashboardData();
     }
-  }, [monthString, user, userLoading]);
+  }, [userLoading, dashboardRefreshKey, fetchDashboardData]);
 
   // Show loading while user context is loading OR while fetching dashboard data
   if (userLoading || isLoading) {
@@ -114,7 +116,7 @@ export default function DashboardCards() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 transition-opacity duration-300">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Total Expenses Card */}

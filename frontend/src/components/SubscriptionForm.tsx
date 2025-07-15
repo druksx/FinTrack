@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -77,7 +77,7 @@ export default function SubscriptionForm({
       : undefined,
   });
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -90,7 +90,7 @@ export default function SubscriptionForm({
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
-  };
+  }, [user]);
 
   const searchLogo = async () => {
     const name = form.getValues("name");
@@ -198,7 +198,7 @@ export default function SubscriptionForm({
     if (!userLoading && user) {
       fetchCategories();
     }
-  }, [user, userLoading]);
+  }, [userLoading, fetchCategories]);
 
   return (
     <Form {...form}>

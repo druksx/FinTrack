@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { BadgeQuestionMark, Pencil, Trash2 } from "lucide-react";
 import CategoryPill from "./CategoryPill";
 import AddExpenseDialog from "./AddExpenseDialog";
@@ -9,6 +9,7 @@ import { CATEGORY_ICONS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient, API_ENDPOINTS } from "@/lib/api";
 import { useUser } from "@/lib/UserContext";
+import { useRefresh } from "@/lib/RefreshContext";
 
 interface Category {
   id: string;
@@ -29,6 +30,7 @@ interface Expense {
 export default function ExpenseList() {
   const { monthString } = useMonth();
   const { user, isLoading: userLoading } = useUser();
+  const { expensesRefreshKey, refreshAll } = useRefresh();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +40,7 @@ export default function ExpenseList() {
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const { toast } = useToast();
 
-  const fetchExpenses = async () => {
+  const fetchExpenses = useCallback(async () => {
     if (!user) {
       setIsLoading(false);
       return;
@@ -67,7 +69,7 @@ export default function ExpenseList() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, monthString]);
 
   const handleDeleteExpense = async (id: string) => {
     if (!user) return;
@@ -82,7 +84,7 @@ export default function ExpenseList() {
         throw new Error("Failed to delete expense");
       }
 
-      await fetchExpenses();
+      refreshAll(); // Refresh all components that display expense data
       toast({
         title: "Expense deleted",
         description: "Successfully deleted the expense.",
@@ -107,7 +109,7 @@ export default function ExpenseList() {
     if (!userLoading) {
       fetchExpenses();
     }
-  }, [monthString, user, userLoading]);
+  }, [userLoading, expensesRefreshKey, fetchExpenses]);
 
   // Show loading while user context is loading OR while fetching expenses
   if (userLoading || isLoading) {
@@ -131,7 +133,7 @@ export default function ExpenseList() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 transition-opacity duration-300">
       <div className="flex flex-col gap-3">
         {expenses.map((expense) => {
           const IconComponent =
