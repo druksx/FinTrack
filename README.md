@@ -21,6 +21,8 @@ cd FinTrack
 docker-compose up
 ```
 
+**Note:** ⏳ The first build might take a few minutes as Docker compiles all dependencies. Subsequent builds will be much faster thanks to caching.
+
 **Access the application:**
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:3333
@@ -169,15 +171,3 @@ npm test
 - **Development**: Hot reload with file watching
 - **Production**: Optimized standalone builds
 - **Database**: Persistent PostgreSQL with Docker volumes
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests: `cd backend && npm test`
-5. Submit a pull request
-
-## 📝 License
-
-This project is licensed under the MIT License.
