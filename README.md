@@ -8,6 +8,29 @@ A comprehensive personal finance management application built with modern web te
 - Docker and Docker Compose installed
 - Node.js 20+ (for local development)
 
+### 🗄️ Environment Setup
+
+Both the backend and frontend require environment variables to be configured before launching the application.
+
+1. Locate the `.env.example` file in each directory:
+   
+    - `backend/.env.example`
+    - `frontend/.env.example`
+  
+3. Copy each `.env.example` file to its respective environment file:
+
+      ```bash
+      # For backend:
+      cp backend/.env.example backend/.env
+      ```
+      ```bash
+      # For frontend:
+      cp frontend/.env.example frontend/.env.local
+      ```
+4. Open the newly created files and replace the placeholder values with your own configuration.
+
+> **Note:** Never commit your `.env` or `.env.local` files to source control: they contain **sensitive** information.
+
 ### 🏃 Launch the Application
 
 **The fastest way to get started:**
